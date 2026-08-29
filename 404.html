@@ -1496,7 +1496,7 @@
     // Load pricing packages from cloud API or local fallback
     async function loadPricingPackages() {
       try {
-        const response = await fetch('/api/pricing');
+        const response = await fetch('/api/pricing', { cache: 'no-store' });
         if (response.ok) {
           const res = await response.json();
           if (res.success) {
@@ -3845,7 +3845,7 @@
 
     async function loadPublicContentsFromCloud() {
       try {
-        const response = await fetch('/api/public-contents');
+        const response = await fetch('/api/public-contents', { cache: 'no-store' });
         if (response.ok) {
           const res = await response.json();
           if (res.success) {
@@ -3951,7 +3951,7 @@
 
     async function loadCustomContentFromCloud() {
       try {
-        const response = await fetch('/api/custom-contents');
+        const response = await fetch('/api/custom-contents', { cache: 'no-store' });
         if (response.ok) {
           const res = await response.json();
           if (res.success) {
@@ -4626,7 +4626,8 @@
       if (dbConnectionMode === 'cloudflare_kv' && adminToken) {
         try {
           const response = await fetch('/api/contacts', {
-            headers: { 'Authorization': `Bearer ${adminToken}` }
+            headers: { 'Authorization': `Bearer ${adminToken}` },
+            cache: 'no-store'
           });
           if (response.ok) {
             const res = await response.json();
