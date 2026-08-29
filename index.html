@@ -989,7 +989,7 @@
                 <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-950 font-bold flex items-center justify-center shrink-0">2</span>
                 <div>
                   <h4 class="font-bold text-slate-900">Bind the KV namespace to Pages</h4>
-                  <p class="text-slate-500 mt-0.5">Go to your Pages project in Cloudflare Pages dashboard &rarr; <strong>Settings</strong> &rarr; <strong>Functions</strong> &rarr; <strong>KV namespace bindings</strong>. Click <strong>Add binding</strong>. Set the Variable name to exactly <code>SCHOOLS_KV</code> and select the KV namespace you created (<code>elimu_express_db</code>).</p>
+                  <p class="text-slate-500 mt-0.5">Go to your Pages project in Cloudflare Pages dashboard &rarr; <strong>Settings</strong> &rarr; <strong>Functions</strong> &rarr; <strong>KV namespace bindings</strong>. Click <strong>Add binding</strong>. Set the Variable name to exactly <code>MY_KV_NAMESPACE</code>, <code>SCHOOLS_KV</code>, or <code>ELIMU_DB</code> and select the KV namespace you created (<code>elimu_express_db</code>).</p>
                 </div>
               </div>
 
@@ -1289,7 +1289,10 @@
       // an SVG markup string (starts with "<svg"), or a remote image URL (starts with "http" or "data:")
       logo: "graduation-cap",
       // Favicon: Local image file path or URL
-      favicon: "favicon.png"
+      favicon: "favicon.png",
+      // Cloudflare Worker API URL: Set to your independent worker domain (e.g. "https://your-worker-subdomain.workers.dev")
+      // or leave empty "" to route to Cloudflare Pages Functions relatively.
+      apiUrl: ""
     };
 
     function applySystemBranding() {
@@ -1408,6 +1411,13 @@
     ];
 
     // Global database state
+    let siteState = {
+      schools: [],
+      pricing: [],
+      publicContents: {},
+      customContents: []
+    };
+
     let institutions = [];
     let pricingPackages = [];
     let dbConnectionMode = 'local_storage'; // 'cloudflare_kv' or 'local_storage'
@@ -1415,26 +1425,32 @@
     // Load credentials from sessionStorage
     let adminToken = sessionStorage.getItem('elimu_admin_token') || null;
 
-    // Load institutions from cloud API or local fallback
-    async function loadInstitutions() {
+    async function loadSiteData() {
       try {
-        const response = await fetch('/api/schools', { cache: 'no-store' });
+        const response = await fetch((SYSTEM_CONFIG.apiUrl || '') + '/api/content', { cache: 'no-store' });
         if (response.ok) {
           const res = await response.json();
-          if (res.success) {
-            dbConnectionMode = res.dbMode || 'cloudflare_kv';
-            updateDbConnectionBadge();
-            if (dbConnectionMode === 'cloudflare_kv') {
-              if (res.data) {
-                institutions = res.data;
-              } else {
-                institutions = [...defaultInstitutions];
-                if (adminToken) {
-                  saveInstitutions(institutions);
-                }
+          dbConnectionMode = res.dbMode || 'cloudflare_kv';
+          updateDbConnectionBadge();
+
+          if (dbConnectionMode === 'cloudflare_kv') {
+            if (res.schools || res.pricing || res.publicContents || res.customContents) {
+              siteState.schools = res.schools || [];
+              siteState.pricing = res.pricing || [];
+              siteState.publicContents = res.publicContents || {};
+              siteState.customContents = res.customContents || [];
+            } else {
+              // Initialize database on first run
+              siteState.schools = [...defaultInstitutions];
+              siteState.pricing = [...defaultPricingPackages];
+              siteState.publicContents = { ...DEFAULT_PUBLIC_CONTENTS };
+              siteState.customContents = [];
+              if (adminToken) {
+                await saveSiteStateSilent();
               }
-              return;
             }
+            applySiteState();
+            return;
           }
         }
       } catch (err) {
@@ -1444,37 +1460,83 @@
       // Local storage fallback
       dbConnectionMode = 'local_storage';
       updateDbConnectionBadge();
-      const stored = localStorage.getItem('elimu_institutions_prod');
+      const stored = localStorage.getItem('elimu_site_state_prod');
       if (stored) {
         try {
-          institutions = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          siteState.schools = parsed.schools || [...defaultInstitutions];
+          siteState.pricing = parsed.pricing || [...defaultPricingPackages];
+          siteState.publicContents = parsed.publicContents || { ...DEFAULT_PUBLIC_CONTENTS };
+          siteState.customContents = parsed.customContents || [];
         } catch (e) {
-          institutions = [...defaultInstitutions];
+          loadStateDefaults();
         }
       } else {
-        institutions = [...defaultInstitutions];
-        localStorage.setItem('elimu_institutions_prod', JSON.stringify(institutions));
+        loadStateDefaults();
+        localStorage.setItem('elimu_site_state_prod', JSON.stringify(siteState));
+      }
+      applySiteState();
+    }
+
+    function loadStateDefaults() {
+      siteState.schools = [...defaultInstitutions];
+      siteState.pricing = [...defaultPricingPackages];
+      siteState.publicContents = { ...DEFAULT_PUBLIC_CONTENTS };
+      siteState.customContents = [];
+    }
+
+    function applySiteState() {
+      institutions = siteState.schools;
+      pricingPackages = siteState.pricing;
+      publicContents = siteState.publicContents;
+      customContentSections = siteState.customContents;
+
+      applyPublicContents();
+      renderSchools();
+      renderCmsTable();
+      populateCmsPackageOptions();
+      renderPricingPackages();
+      renderPricingCmsTable();
+      renderCustomContentBlocks();
+      if (activeInstitution) {
+        openFormForSchool(activeInstitution.id, false);
       }
     }
 
-    // Save institutions to cloud API or local fallback
-    async function saveInstitutions(data) {
-      institutions = data;
-      localStorage.setItem('elimu_institutions_prod', JSON.stringify(data)); // always keep local copy updated
-
+    async function saveSiteStateSilent() {
+      localStorage.setItem('elimu_site_state_prod', JSON.stringify(siteState));
       if (dbConnectionMode === 'cloudflare_kv' && adminToken) {
         try {
-          const response = await fetch('/api/schools', {
+          await fetch((SYSTEM_CONFIG.apiUrl || '') + '/api/content', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${adminToken}`
             },
-            body: JSON.stringify({ data })
+            body: JSON.stringify(siteState)
+          });
+        } catch (e) {
+          console.error("Silent KV sync failed", e);
+        }
+      }
+    }
+
+    async function saveSiteState() {
+      localStorage.setItem('elimu_site_state_prod', JSON.stringify(siteState));
+
+      if (dbConnectionMode === 'cloudflare_kv' && adminToken) {
+        try {
+          const response = await fetch((SYSTEM_CONFIG.apiUrl || '') + '/api/content', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${adminToken}`
+            },
+            body: JSON.stringify(siteState)
           });
           if (!response.ok) {
             const errRes = await response.json().catch(() => ({}));
-            alert("❌ Database Save Error: Failed to sync changes with Cloudflare KV. " + (errRes.error || "Please verify your SCHOOLS_KV namespace binding."));
+            alert("❌ Database Save Error: Failed to sync changes with Cloudflare KV. " + (errRes.error || "Please verify your KV namespace binding."));
           }
         } catch (err) {
           alert("❌ Network Error: Could not reach the Cloudflare server to save changes.");
@@ -1482,89 +1544,18 @@
       } else if (dbConnectionMode === 'local_storage') {
         alert("⚠️ Local Storage Warning: Saved successfully, but you are in Offline Local Storage Mode. Other people will NOT see this change until you connect Cloudflare KV database!");
       }
-
-      renderSchools();
-      renderCmsTable();
-      if (activeInstitution) {
-        const fresh = data.find(i => i.id === activeInstitution.id);
-        if (fresh) {
-          openFormForSchool(fresh.id, false);
-        }
-      }
     }
 
-    // Load pricing packages from cloud API or local fallback
-    async function loadPricingPackages() {
-      try {
-        const response = await fetch('/api/pricing', { cache: 'no-store' });
-        if (response.ok) {
-          const res = await response.json();
-          if (res.success) {
-            const mode = res.dbMode || 'cloudflare_kv';
-            if (mode === 'cloudflare_kv') {
-              if (res.data) {
-                pricingPackages = res.data;
-              } else {
-                pricingPackages = [...defaultPricingPackages];
-                if (adminToken) {
-                  savePricingPackages(pricingPackages);
-                }
-              }
-              return;
-            }
-          }
-        }
-      } catch (err) {
-        console.warn("Pricing API not reachable. Running in local storage mode.");
-      }
-
-      // Local storage fallback
-      const stored = localStorage.getItem('elimu_pricing_prod');
-      if (stored) {
-        try {
-          pricingPackages = JSON.parse(stored);
-        } catch (e) {
-          pricingPackages = [...defaultPricingPackages];
-        }
-      } else {
-        pricingPackages = [...defaultPricingPackages];
-        localStorage.setItem('elimu_pricing_prod', JSON.stringify(pricingPackages));
-      }
-      populateCmsPackageOptions();
+    async function saveInstitutions(data) {
+      siteState.schools = data;
+      applySiteState();
+      await saveSiteState();
     }
 
-    // Save pricing packages to cloud API or local fallback
     async function savePricingPackages(data) {
-      pricingPackages = data;
-      localStorage.setItem('elimu_pricing_prod', JSON.stringify(data));
-
-      if (dbConnectionMode === 'cloudflare_kv' && adminToken) {
-        try {
-          const response = await fetch('/api/pricing', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${adminToken}`
-            },
-            body: JSON.stringify({ data })
-          });
-          if (!response.ok) {
-            const errRes = await response.json().catch(() => ({}));
-            alert("❌ Database Save Error: Failed to sync pricing changes with Cloudflare KV. " + (errRes.error || ""));
-          }
-        } catch (err) {
-          alert("❌ Network Error: Could not sync pricing with Cloudflare KV.");
-        }
-      } else if (dbConnectionMode === 'local_storage') {
-        alert("⚠️ Local Storage Warning: Pricing packages saved locally only. Other people will NOT see this change until you connect Cloudflare KV database!");
-      }
-
-      renderPricingPackages();
-      renderPricingCmsTable();
-      populateCmsPackageOptions();
-      if (activeInstitution) {
-        openFormForSchool(activeInstitution.id, false);
-      }
+      siteState.pricing = data;
+      applySiteState();
+      await saveSiteState();
     }
 
     function populateCmsPackageOptions() {
@@ -3531,7 +3522,7 @@
 
       // Post to backend database
       try {
-        await fetch('/api/contacts', {
+        await fetch((SYSTEM_CONFIG.apiUrl || '') + '/api/contacts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newMsg)
@@ -3551,7 +3542,7 @@
       errEl.classList.add('hidden');
 
       try {
-        const response = await fetch('/api/auth', {
+        const response = await fetch((SYSTEM_CONFIG.apiUrl || '') + '/api/auth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password })
@@ -4625,7 +4616,7 @@
 
       if (dbConnectionMode === 'cloudflare_kv' && adminToken) {
         try {
-          const response = await fetch('/api/contacts', {
+          const response = await fetch((SYSTEM_CONFIG.apiUrl || '') + '/api/contacts', {
             headers: { 'Authorization': `Bearer ${adminToken}` },
             cache: 'no-store'
           });
@@ -4688,7 +4679,7 @@
 
         if (dbConnectionMode === 'cloudflare_kv' && adminToken) {
           try {
-            await fetch('/api/contacts', {
+            await fetch((SYSTEM_CONFIG.apiUrl || '') + '/api/contacts', {
               method: 'POST',
               headers: { 
                 'Content-Type': 'application/json',
@@ -4854,11 +4845,7 @@
       loadGlobalLanguage();
       loadAvailableFeatures();
       populatePredefinedFeatures();
-      await loadInstitutions();
-      await loadPricingPackages();
-      await loadPublicContentsFromCloud();
-      await loadCustomContentFromCloud();
-      renderSchools();
+      await loadSiteData();
       checkUrlRouting();
 
       // Set up auto-saving for form drafts
