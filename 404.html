@@ -327,13 +327,28 @@
                     <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Religion / Denomination" data-sw="Dini / Dhehebu">Religion / Denomination</span></label>
                     <input type="text" id="form-religion" placeholder="e.g. Christian, Muslim" data-placeholder-en="e.g. Christian, Muslim" data-placeholder-sw="Mfano: Mkristo, Muislamu" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
                   </div>
-                  <div>
+                  <div id="form-class-container">
                     <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Applying Level/Class *" data-sw="Darasa / Kidato / Kozi ya Maombi *">Applying Level/Class *</span></label>
-                    <input type="text" id="form-class" placeholder="e.g. Std 1, Form 1, NTA Level 4" data-placeholder-en="e.g. Std 1, Form 1, NTA Level 4" data-placeholder-sw="Mfano: Std 1, Kidato cha 1, Astashahada" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    <select id="form-class" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none"></select>
                   </div>
-                  <div class="sm:col-span-2">
-                    <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Residential Address (Region, District, Street) *" data-sw="Makazi (Mkoa, Wilaya, Mtaa/Kijiji) *">Residential Address (Region, District, Street) *</span></label>
-                    <input type="text" id="form-location" placeholder="e.g. Dar es Salaam, Kigamboni, Tuangoma" data-placeholder-en="e.g. Dar es Salaam, Kigamboni, Tuangoma" data-placeholder-sw="Mfano: Dar es Salaam, Kigamboni, Tuangoma" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                  <div class="sm:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div>
+                      <label class="block text-[10px] font-semibold text-slate-700"><span class="lang-txt" data-en="Region *" data-sw="Mkoa *">Region *</span></label>
+                      <input type="text" id="form-region" placeholder="e.g. Dar es Salaam" required oninput="updateCombinedLocation()" class="mt-1 w-full px-2.5 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-semibold text-slate-700"><span class="lang-txt" data-en="District *" data-sw="Wilaya *">District *</span></label>
+                      <input type="text" id="form-district" placeholder="e.g. Kigamboni" required oninput="updateCombinedLocation()" class="mt-1 w-full px-2.5 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-semibold text-slate-700"><span class="lang-txt" data-en="Ward *" data-sw="Kata *">Ward *</span></label>
+                      <input type="text" id="form-ward" placeholder="e.g. Tuangoma" required oninput="updateCombinedLocation()" class="mt-1 w-full px-2.5 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-semibold text-slate-700"><span class="lang-txt" data-en="Village / Street *" data-sw="Kijiji / Mtaa *">Village / Street *</span></label>
+                      <input type="text" id="form-street" placeholder="e.g. Masimbani" required oninput="updateCombinedLocation()" class="mt-1 w-full px-2.5 py-1.5 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                    <input type="hidden" id="form-location" required />
                   </div>
                   <div id="form-passport-upload-container" class="sm:col-span-2">
                     <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Passport Photograph (Max 1MB) *" data-sw="Picha ya Pasipoti (Max 1MB) *">Passport Photograph (Max 1MB) *</span></label>
@@ -825,7 +840,7 @@
 
                 <div>
                   <label class="block text-[11px] font-bold text-slate-700">Category *</label>
-                  <select id="cms-category" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                  <select id="cms-category" required onchange="handleCmsCategoryChange()" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
                     <option value="kindergarten">Kindergarten / Nursery</option>
                     <option value="primary">Primary School</option>
                     <option value="secondary">Secondary School</option>
@@ -852,6 +867,12 @@
                   <label class="block text-[11px] font-bold text-slate-700">Courses/Programs Offered (Comma-separated, for Colleges/Vocational)</label>
                   <textarea id="cms-programs" placeholder="e.g. Certificate in Nursing, Diploma in Clinical Medicine, Basic Driving" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" rows="2"></textarea>
                   <p class="text-[9px] text-slate-400 mt-0.5">Separate multiple programs/courses with commas. These will appear in the applicant's program dropdown.</p>
+                </div>
+
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-700">Custom Admission Levels/Classes (Comma-separated)</label>
+                  <textarea id="cms-levels" placeholder="e.g. Std 1, Std 2, Form 1, Form 2..." class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" rows="2"></textarea>
+                  <p class="text-[9px] text-slate-400 mt-0.5">Separate classes/levels with commas (e.g. 'Baby Class 1, Baby Class 2' or 'Std 1, Std 2'). If blank, defaults will be used.</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
@@ -1916,6 +1937,66 @@
       // Set customizable joining instructions text
       document.getElementById('form-joining-text-content').innerHTML = inst.joining ? inst.joining.replace(/\n/g, '<br/>') : "No joining instructions registered for this school.";
 
+      // Populate Applying Levels/Classes select options dropdown dynamically
+      const classSelect = document.getElementById('form-class');
+      const classContainer = document.getElementById('form-class-container');
+      
+      if (inst.category === 'vocational') {
+        if (classContainer) classContainer.classList.add('hidden');
+        if (classSelect) {
+          classSelect.innerHTML = '';
+          const opt = document.createElement('option');
+          opt.value = 'N/A';
+          opt.textContent = 'N/A';
+          classSelect.appendChild(opt);
+        }
+        
+        // Populate the vocational Award Levels dropdown instead
+        const awardSelect = document.getElementById('form-voc-award');
+        if (awardSelect) {
+          awardSelect.innerHTML = '';
+          let levelString = inst.levels || '';
+          if (!levelString.trim()) {
+            levelString = "Level 1, Level 2, Level 3, NTA Level 4, NTA Level 5, NTA Level 6";
+          }
+          const levelArray = levelString.split(',')
+            .map(l => l.trim())
+            .filter(l => l.length > 0);
+            
+          levelArray.forEach(lvl => {
+            const opt = document.createElement('option');
+            opt.value = lvl;
+            opt.textContent = lvl;
+            awardSelect.appendChild(opt);
+          });
+        }
+      } else {
+        if (classContainer) classContainer.classList.remove('hidden');
+        if (classSelect) {
+          classSelect.innerHTML = '';
+          let levelString = inst.levels || '';
+          if (!levelString.trim()) {
+            if (inst.category === 'kindergarten') {
+              levelString = "Baby Class 1, Baby Class 2, Baby Class 3";
+            } else if (inst.category === 'primary') {
+              levelString = "Kindergarten, Std 1, Std 2, Std 3, Std 4, Std 5, Std 6, Std 7";
+            } else if (inst.category === 'secondary') {
+              levelString = "Pre-Form 1, Form 1, Form 2, Form 3, Form 4, Form 5, Form 6";
+            }
+          }
+          const levelArray = levelString.split(',')
+            .map(l => l.trim())
+            .filter(l => l.length > 0);
+            
+          levelArray.forEach(lvl => {
+            const opt = document.createElement('option');
+            opt.value = lvl;
+            opt.textContent = lvl;
+            classSelect.appendChild(opt);
+          });
+        }
+      }
+
       // Show level specific fields (Tanzania Admissions Standards)
       document.getElementById('fields-kindergarten').classList.add('hidden');
       document.getElementById('fields-primary').classList.add('hidden');
@@ -2292,6 +2373,27 @@
       txtarea.selectionEnd = start + replacement.length;
     }
 
+    function handleCmsCategoryChange() {
+      const category = document.getElementById('cms-category').value;
+      const levelsField = document.getElementById('cms-levels');
+      const programsField = document.getElementById('cms-programs');
+      if (!levelsField || !programsField) return;
+      
+      if (category === 'kindergarten') {
+        levelsField.value = "Baby Class 1, Baby Class 2, Baby Class 3";
+        programsField.value = "";
+      } else if (category === 'primary') {
+        levelsField.value = "Kindergarten, Std 1, Std 2, Std 3, Std 4, Std 5, Std 6, Std 7";
+        programsField.value = "";
+      } else if (category === 'secondary') {
+        levelsField.value = "Pre-Form 1, Form 1, Form 2, Form 3, Form 4, Form 5, Form 6";
+        programsField.value = "";
+      } else if (category === 'vocational') {
+        levelsField.value = "Level 1, Level 2, Level 3, NTA Level 4, NTA Level 5, NTA Level 6";
+        programsField.value = "Certificate in Information Technology, Diploma in Information Technology, Certificate in Business Administration";
+      }
+    }
+
     function clearSignaturePad() {
       if (!signaturePad || !signatureCtx) return;
       signatureCtx.clearRect(0, 0, signaturePad.width, signaturePad.height);
@@ -2569,6 +2671,16 @@
       };
       img.src = src;
     }
+    
+    function updateCombinedLocation() {
+      const reg = document.getElementById('form-region').value.trim();
+      const dist = document.getElementById('form-district').value.trim();
+      const ward = document.getElementById('form-ward').value.trim();
+      const str = document.getElementById('form-street').value.trim();
+      document.getElementById('form-location').value = `${reg}, ${dist}, ${ward}, ${str}`;
+      saveFormDraft();
+    }
+
     function saveFormDraft() {
       if (!activeInstitution) return;
       const form = document.getElementById('institution-admission-form');
@@ -2617,6 +2729,16 @@
             }
           }
         });
+
+        // Split and restore separated residential address inputs
+        const locVal = document.getElementById('form-location').value || '';
+        if (locVal) {
+          const parts = locVal.split(',');
+          if (parts[0]) document.getElementById('form-region').value = parts[0].trim();
+          if (parts[1]) document.getElementById('form-district').value = parts[1].trim();
+          if (parts[2]) document.getElementById('form-ward').value = parts[2].trim();
+          if (parts[3]) document.getElementById('form-street').value = parts[3].trim();
+        }
 
         // Restore passport photo preview
         passportPhotoBase64 = draft.passportPhoto || null;
@@ -4751,6 +4873,7 @@
       const regNo = document.getElementById('cms-reg-no').value.trim();
       const poBox = document.getElementById('cms-po-box').value.trim();
       const programs = document.getElementById('cms-programs').value.trim();
+      const levels = document.getElementById('cms-levels').value.trim();
       const phone = document.getElementById('cms-phone').value.trim();
       const email = document.getElementById('cms-email').value.trim();
       const image = document.getElementById('cms-image').value.trim();
@@ -4828,6 +4951,7 @@
             regNo,
             poBox,
             programs,
+            levels,
             phone,
             email,
             image,
@@ -4854,6 +4978,7 @@
           regNo,
           poBox,
           programs,
+          levels,
           phone,
           email,
           image,
@@ -4887,7 +5012,25 @@
       document.getElementById('cms-region').value = inst.region;
       document.getElementById('cms-reg-no').value = inst.regNo || '';
       document.getElementById('cms-po-box').value = inst.poBox || '';
-      document.getElementById('cms-programs').value = inst.programs || '';
+      let programsVal = inst.programs || '';
+      if (inst.category === 'vocational' && !programsVal.trim()) {
+        programsVal = "Certificate in Information Technology, Diploma in Information Technology, Certificate in Business Administration";
+      }
+      document.getElementById('cms-programs').value = programsVal;
+
+      let levelsVal = inst.levels || '';
+      if (!levelsVal.trim()) {
+        if (inst.category === 'kindergarten') {
+          levelsVal = "Baby Class 1, Baby Class 2, Baby Class 3";
+        } else if (inst.category === 'primary') {
+          levelsVal = "Kindergarten, Std 1, Std 2, Std 3, Std 4, Std 5, Std 6, Std 7";
+        } else if (inst.category === 'secondary') {
+          levelsVal = "Pre-Form 1, Form 1, Form 2, Form 3, Form 4, Form 5, Form 6";
+        } else if (inst.category === 'vocational') {
+          levelsVal = "Level 1, Level 2, Level 3, NTA Level 4, NTA Level 5, NTA Level 6";
+        }
+      }
+      document.getElementById('cms-levels').value = levelsVal;
       document.getElementById('cms-phone').value = inst.phone;
       document.getElementById('cms-email').value = inst.email;
       document.getElementById('cms-image').value = inst.image || '';
