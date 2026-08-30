@@ -28,3 +28,6 @@
 - [x] Disable and visually gray out card submission buttons for expired or suspended schools
 - [x] Consolidate CMS public page texts and custom page block saves into the central `siteState` KV API endpoint (`/api/content`) to guarantee global, instant real-time syncs
 - [x] Design and embed an interactive HTML5 digital signature pad using stylus/mouse drawing, and render signatures directly inside PDF registration sheets
+- [x] Implement history state URL parameter tab-preservation for CMS admin dashboard views and school form tabs to automatically restore viewing context on page reloads
+- [x] Integrate platform support phone, support email, and office location address into the CMS content manager form to keep them fully configurable
+- [x] Add Registration Number and P.O. Box fields inside the CMS institution builder form, rendering them dynamically inside the PDF header when no letterhead banner is configured

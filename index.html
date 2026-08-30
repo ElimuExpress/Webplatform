@@ -806,9 +806,19 @@
                   </select>
                 </div>
 
-                <div>
-                  <label class="block text-[11px] font-bold text-slate-700">Region & District *</label>
-                  <input type="text" id="cms-region" required placeholder="e.g. Dar es Salaam, Kigamboni" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700">Region & District *</label>
+                    <input type="text" id="cms-region" required placeholder="e.g. Dar es Salaam" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700">Reg No (e.g. S.4011) *</label>
+                    <input type="text" id="cms-reg-no" required placeholder="e.g. S.4011 / DS.105" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700">P.O. Box (S.L.P) *</label>
+                    <input type="text" id="cms-po-box" required placeholder="e.g. P.O. Box 4501" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                  </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
@@ -1139,6 +1149,20 @@
                     <label class="block text-[11px] font-bold text-slate-600">Contact Subtitle/Text *</label>
                     <textarea id="cms-content-contact-text" rows="3" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
                   </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-600">Support Phone *</label>
+                      <input type="text" id="cms-content-contact-phone" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-600">Admissions Email *</label>
+                      <input type="email" id="cms-content-contact-email" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-600">Office Location / Address *</label>
+                      <input type="text" id="cms-content-contact-address" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1244,7 +1268,7 @@
             </div>
             <h4 class="font-bold text-slate-900">Direct Support</h4>
             <p class="text-slate-500 text-xs mt-1">Mon - Fri: 8:00 AM - 5:00 PM</p>
-            <p class="font-semibold text-brand-700 text-sm mt-3">+255 7XX XXX XXX</p>
+            <p id="contact-info-phone" class="font-semibold text-brand-700 text-sm mt-3">+255 7XX XXX XXX</p>
           </div>
 
           <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
@@ -1253,7 +1277,7 @@
             </div>
             <h4 class="font-bold text-slate-900">Admissions Desk</h4>
             <p class="text-slate-500 text-xs mt-1">Direct Help Desk</p>
-            <p class="font-semibold text-brand-700 text-sm mt-3">support@elimu-express.co.tz</p>
+            <p id="contact-info-email" class="font-semibold text-brand-700 text-sm mt-3">support@elimu-express.co.tz</p>
           </div>
 
           <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
@@ -1262,7 +1286,7 @@
             </div>
             <h4 class="font-bold text-slate-900">Main Office</h4>
             <p class="text-slate-500 text-xs mt-1">Dar es Salaam, Tanzania</p>
-            <p class="font-semibold text-brand-700 text-sm mt-3">Kigamboni & Posta Hub</p>
+            <p id="contact-info-address" class="font-semibold text-brand-700 text-sm mt-3">Kigamboni & Posta Hub</p>
           </div>
         </div>
 
@@ -1924,8 +1948,14 @@
       // Initialize drawing signature pad
       initSignaturePad();
       
-      // Default to "Form" tab
-      switchFormTab('form');
+      // Load saved form tab or default to 'form'
+      const params = new URLSearchParams(window.location.search);
+      const savedTab = params.get('tab');
+      if (savedTab === 'joining' || savedTab === 'form') {
+        switchFormTab(savedTab);
+      } else {
+        switchFormTab('form');
+      }
 
       // Update Language Switcher UI for default (EN)
       toggleFormLanguage('en');
@@ -1937,6 +1967,9 @@
 
     function closeFormGenerator() {
       document.getElementById('active-form-wrapper').classList.add('hidden');
+      const url = new URL(window.location);
+      url.searchParams.delete('tab');
+      window.history.replaceState({}, '', url);
       try {
         window.location.hash = '#/forms';
       } catch (e) {
@@ -1945,6 +1978,10 @@
     }
 
     function switchFormTab(tab) {
+      const url = new URL(window.location);
+      url.searchParams.set('tab', tab);
+      window.history.replaceState({}, '', url);
+
       const pCol = activeInstitution ? (activeInstitution.primaryColor || '#059669') : '#059669';
       const tabForm = document.getElementById('tab-btn-form');
       const tabJoining = document.getElementById('tab-btn-joining');
@@ -2488,7 +2525,7 @@
                     <div>
                       <div class="pdf-header-flag">${headerFlag}</div>
                       <h2 class="pdf-school-title">${activeInstitution.name}</h2>
-                      <p class="pdf-school-meta">S.L.P / P.O. Box ${activeInstitution.region || 'Tanzania'} &bull; Email: ${activeInstitution.email} &bull; Simu: +${activeInstitution.phone}</p>
+                      <p class="pdf-school-meta">Reg No: ${activeInstitution.regNo || 'N/A'} &bull; S.L.P / P.O. Box: ${activeInstitution.poBox || 'N/A'}, ${activeInstitution.region || 'Tanzania'} &bull; Email: ${activeInstitution.email} &bull; Simu: +${activeInstitution.phone}</p>
                       <div class="pdf-form-title">${levelTitle}</div>
                     </div>
                   </div>
@@ -3649,7 +3686,15 @@
       if (adminToken) {
         loginPanel.classList.add('hidden');
         dashboard.classList.remove('hidden');
-        switchCmsTab('schools');
+        
+        const params = new URLSearchParams(window.location.search);
+        const savedTab = params.get('tab');
+        const validCmsTabs = ['schools', 'pricing', 'db', 'contacts', 'content'];
+        if (savedTab && validCmsTabs.includes(savedTab)) {
+          switchCmsTab(savedTab);
+        } else {
+          switchCmsTab('schools');
+        }
       } else {
         loginPanel.classList.remove('hidden');
         dashboard.classList.add('hidden');
@@ -3733,10 +3778,17 @@
     function handleAdminLogout() {
       adminToken = null;
       sessionStorage.removeItem('elimu_admin_token');
+      const url = new URL(window.location);
+      url.searchParams.delete('tab');
+      window.history.replaceState({}, '', url);
       checkCmsAuth();
     }
 
     function switchCmsTab(tab) {
+      const url = new URL(window.location);
+      url.searchParams.set('tab', tab);
+      window.history.replaceState({}, '', url);
+
       // Hide all tabs
       document.getElementById('cms-tab-view-schools').classList.add('hidden');
       document.getElementById('cms-tab-view-pricing').classList.add('hidden');
@@ -3945,7 +3997,10 @@
       aboutTitle: "We Help You Join Schools Faster & Stress-Free",
       aboutText: "Elimu Express was built to solve a simple problem: school registration is too slow and stressful. We help parents fill out school admission forms directly from their phones or computers, download them as clean PDFs, and submit them instantly to the school via WhatsApp or Email. No paperwork, no physical queueing, no waste of time.",
       contactTitle: "We Are Here to Help You",
-      contactText: "Have questions about school registrations, pricing plans, or need help listing your school? Send us a message below and our team will get back to you quickly."
+      contactText: "Have questions about school registrations, pricing plans, or need help listing your school? Send us a message below and our team will get back to you quickly.",
+      contactPhone: "+255 7XX XXX XXX",
+      contactEmail: "support@elimu-express.co.tz",
+      contactAddress: "Kigamboni & Posta Hub"
     };
 
     let publicContents = {};
@@ -3986,6 +4041,13 @@
       const contactTextEl = document.getElementById('contact-text');
       if (contactTitleEl) contactTitleEl.textContent = publicContents.contactTitle;
       if (contactTextEl) contactTextEl.textContent = publicContents.contactText;
+
+      const contactPhoneEl = document.getElementById('contact-info-phone');
+      const contactEmailEl = document.getElementById('contact-info-email');
+      const contactAddressEl = document.getElementById('contact-info-address');
+      if (contactPhoneEl) contactPhoneEl.textContent = publicContents.contactPhone || DEFAULT_PUBLIC_CONTENTS.contactPhone;
+      if (contactEmailEl) contactEmailEl.textContent = publicContents.contactEmail || DEFAULT_PUBLIC_CONTENTS.contactEmail;
+      if (contactAddressEl) contactAddressEl.textContent = publicContents.contactAddress || DEFAULT_PUBLIC_CONTENTS.contactAddress;
 
       if (window.lucide) {
         window.lucide.createIcons();
@@ -4032,6 +4094,10 @@
       document.getElementById('cms-content-contact-title').value = publicContents.contactTitle || '';
       document.getElementById('cms-content-contact-text').value = publicContents.contactText || '';
 
+      document.getElementById('cms-content-contact-phone').value = publicContents.contactPhone || DEFAULT_PUBLIC_CONTENTS.contactPhone;
+      document.getElementById('cms-content-contact-email').value = publicContents.contactEmail || DEFAULT_PUBLIC_CONTENTS.contactEmail;
+      document.getElementById('cms-content-contact-address').value = publicContents.contactAddress || DEFAULT_PUBLIC_CONTENTS.contactAddress;
+
       renderCustomContentBlocks();
     }
 
@@ -4054,7 +4120,10 @@
         aboutTitle: document.getElementById('cms-content-about-title').value.trim(),
         aboutText: document.getElementById('cms-content-about-text').value.trim(),
         contactTitle: document.getElementById('cms-content-contact-title').value.trim(),
-        contactText: document.getElementById('cms-content-contact-text').value.trim()
+        contactText: document.getElementById('cms-content-contact-text').value.trim(),
+        contactPhone: document.getElementById('cms-content-contact-phone').value.trim(),
+        contactEmail: document.getElementById('cms-content-contact-email').value.trim(),
+        contactAddress: document.getElementById('cms-content-contact-address').value.trim()
       };
 
       await savePublicContents(updatedContents);
@@ -4343,6 +4412,8 @@
       const name = document.getElementById('cms-name').value.trim();
       const category = document.getElementById('cms-category').value;
       const region = document.getElementById('cms-region').value.trim();
+      const regNo = document.getElementById('cms-reg-no').value.trim();
+      const poBox = document.getElementById('cms-po-box').value.trim();
       const phone = document.getElementById('cms-phone').value.trim();
       const email = document.getElementById('cms-email').value.trim();
       const image = document.getElementById('cms-image').value.trim();
@@ -4417,6 +4488,8 @@
             category,
             categoryLabel: getCategoryLabel(category),
             region,
+            regNo,
+            poBox,
             phone,
             email,
             image,
@@ -4440,6 +4513,8 @@
           category,
           categoryLabel: getCategoryLabel(category),
           region,
+          regNo,
+          poBox,
           phone,
           email,
           image,
@@ -4471,6 +4546,8 @@
       document.getElementById('cms-name').value = inst.name;
       document.getElementById('cms-category').value = inst.category;
       document.getElementById('cms-region').value = inst.region;
+      document.getElementById('cms-reg-no').value = inst.regNo || '';
+      document.getElementById('cms-po-box').value = inst.poBox || '';
       document.getElementById('cms-phone').value = inst.phone;
       document.getElementById('cms-email').value = inst.email;
       document.getElementById('cms-image').value = inst.image || '';
