@@ -2512,8 +2512,8 @@
               </div>
               <!-- Passport Photo Right -->
               <div style="width: 30%; display: flex; justify-content: flex-end;">
-                <div class="pdf-passport-box" style="margin: 0; height: 95px; width: 85px; border: 1.5px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 6.5px; font-weight: bold; color: #64748b; background: #f8fafc; line-height: 1.2; box-sizing: border-box; border-radius: 4px; overflow: hidden;">
-                  ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" style="width: 100%; height: 100%; object-fit: cover; display: block;" />` : passportText}
+                <div class="pdf-passport-box" style="margin: 0 15px 0 auto; height: 95px; width: 85px; border: 1.5px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 6.5px; font-weight: bold; color: #64748b; background: #f8fafc; line-height: 1.2; box-sizing: border-box; border-radius: 4px; overflow: hidden; padding: 2px;">
+                  ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" style="width: 100%; height: 100%; object-fit: contain; display: block;" />` : passportText}
                 </div>
               </div>
             </div>
@@ -2541,8 +2541,8 @@
               </div>
               <!-- Passport Photo Right -->
               <div style="width: 30%; display: flex; justify-content: flex-end;">
-                <div class="pdf-passport-box" style="margin: 0; height: 95px; width: 85px; border: 1.5px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 6.5px; font-weight: bold; color: #64748b; background: #f8fafc; line-height: 1.2; box-sizing: border-box; border-radius: 4px; overflow: hidden;">
-                  ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" style="width: 100%; height: 100%; object-fit: cover; display: block;" />` : passportText}
+                <div class="pdf-passport-box" style="margin: 0 15px 0 auto; height: 95px; width: 85px; border: 1.5px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 6.5px; font-weight: bold; color: #64748b; background: #f8fafc; line-height: 1.2; box-sizing: border-box; border-radius: 4px; overflow: hidden; padding: 2px;">
+                  ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" style="width: 100%; height: 100%; object-fit: contain; display: block;" />` : passportText}
                 </div>
               </div>
             </div>
@@ -2610,12 +2610,14 @@
               color: #64748b;
               background: #f8fafc;
               box-sizing: border-box;
-              margin: 0 0 0 auto;
+              margin: 0 15px 0 auto;
               overflow: hidden;
+              padding: 2px;
             }
             .pdf-passport-img {
               width: 100%;
               height: 100%;
+              object-fit: contain;
               display: block;
             }
             .pdf-meta-bar {
