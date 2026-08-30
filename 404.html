@@ -529,8 +529,47 @@
                 </div>
               </div>
 
+              <!-- Parent Declaration & Digital Signature -->
+              <div class="space-y-4 border-t pt-6">
+                <h3 class="text-sm font-bold text-slate-900 border-l-4 border-brand-500 pl-2">
+                  <span class="lang-txt" data-en="Declaration & Signature" data-sw="Tamko na Sahihi">Declaration & Signature</span>
+                </h3>
+                <div class="bg-indigo-50/50 border border-indigo-100 p-4 rounded-xl text-xs text-indigo-950 leading-relaxed">
+                  <span class="lang-txt" 
+                    data-en="I hereby declare that the information provided in this registration form is true, correct, and complete to the best of my knowledge. I agree to abide by all the rules and regulations of the school."
+                    data-sw="Nathibitisha kuwa taarifa zote zilizotolewa kwenye fomu hii ya usajili ni za kweli, sahihi na kamilifu kwa kadri ninavyojua. Nakubali kufuata sheria na kanuni zote za shule.">
+                    I hereby declare that the information provided in this registration form is true, correct, and complete to the best of my knowledge. I agree to abide by all the rules and regulations of the school.
+                  </span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Digital Signature Drawer Canvas -->
+                  <div class="border rounded-xl p-4 bg-slate-50 flex flex-col justify-between">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">
+                      <span class="lang-txt" data-en="Parent / Guardian Digital Signature (Draw below) *" data-sw="Sahihi ya Kidijitali ya Mzazi / Mlezi (Chora chini) *">Parent / Guardian Digital Signature (Draw below) *</span>
+                    </label>
+                    <div class="relative bg-white border border-slate-300 rounded-lg overflow-hidden h-32 flex-grow">
+                      <canvas id="signature-pad" class="w-full h-full cursor-crosshair touch-none"></canvas>
+                      <button type="button" onclick="clearSignaturePad()" class="absolute bottom-2 right-2 px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-[10px] font-semibold text-slate-700 rounded-md transition shadow-sm">
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Signature Date Info or Instruction -->
+                  <div class="border rounded-xl p-4 bg-slate-50 flex flex-col justify-center space-y-2 text-xs text-slate-500">
+                    <p class="font-semibold text-slate-700">Maelekezo / Instructions:</p>
+                    <ul class="list-disc pl-4 space-y-1">
+                      <li>Tumia skrini ya mguso, stylus au panya kuchora sahihi yako kwenye sanduku. / Use your touchscreen, stylus, or mouse to draw your signature.</li>
+                      <li>Bonyeza "Clear" ikiwa umekosea na unataka kuchora upya. / Click "Clear" to redraw it if you make a mistake.</li>
+                      <li>Sahihi hii itawekwa moja kwa moja kwenye fomu yako ya PDF. / This signature will be embedded directly in your PDF.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
               <!-- Action Controls -->
-              <div class="pt-4 border-t flex flex-col sm:flex-row justify-between items-center gap-3">
+              <div class="pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div class="flex gap-2 w-full sm:w-auto">
                   <button type="button" onclick="downloadFormPdf('registration')" class="flex-1 sm:flex-none px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition border border-rose-200" id="btn-pdf-download">
                     <i data-lucide="file-down" class="w-4 h-4"></i> <span class="lang-txt" data-en="Download PDF" data-sw="Pakua Fomu (PDF)">Download PDF</span>
@@ -1598,12 +1637,9 @@
 
       if (updateHistory) {
         try {
-          if (window.location.protocol !== 'file:') {
-            const newPath = pageId === 'home' ? '/' : '/' + pageId;
-            window.history.pushState({ pageId }, '', newPath);
-          }
+          window.location.hash = pageId === 'home' ? '#/' : '#/' + pageId;
         } catch (e) {
-          console.warn("history.pushState bypassed under local file protocol:", e);
+          console.warn("hash routing failed:", e);
         }
       }
 
@@ -1698,7 +1734,7 @@
           const label = isExpired ? 'Expired' : 'Suspended';
           statusBadgeHtml = `<span class="absolute top-3 right-3 bg-rose-600 text-white text-[9px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wider">${label}</span>`;
           btnHtml = `
-            <button onclick="openFormForSchool('${inst.id}')" class="w-full py-2.5 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 border border-slate-200">
+            <button disabled class="w-full py-2.5 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 cursor-not-allowed">
               <i data-lucide="lock" class="w-3.5 h-3.5"></i> Registration Closed
             </button>
           `;
@@ -1751,11 +1787,9 @@
 
       if (updateHistory) {
         try {
-          if (window.location.protocol !== 'file:') {
-            window.history.pushState({ schoolId: inst.id }, '', '/' + (inst.slug || inst.id));
-          }
+          window.location.hash = '#/forms/' + (inst.slug || inst.id);
         } catch (e) {
-          console.warn("history.pushState bypassed under local file protocol:", e);
+          console.warn("hash routing failed:", e);
         }
       }
 
@@ -1859,20 +1893,14 @@
         }
       }
 
-      // Setup Passport Photograph field (only on pkg-3)
+      // Setup Passport Photograph field (always active for Tanzanian admission requirements)
       const passportPreviewCont = document.getElementById('form-passport-preview-container');
       const passportUploadCont = document.getElementById('form-passport-upload-container');
       const passportInput = document.getElementById('form-passport-photo');
       if (passportPreviewCont && passportUploadCont) {
-        if (hasFeature('Custom Domain Support')) {
-          passportPreviewCont.classList.remove('hidden');
-          passportUploadCont.classList.remove('hidden');
-          if (passportInput) passportInput.required = true;
-        } else {
-          passportPreviewCont.classList.add('hidden');
-          passportUploadCont.classList.add('hidden');
-          if (passportInput) passportInput.required = false;
-        }
+        passportPreviewCont.classList.remove('hidden');
+        passportUploadCont.classList.remove('hidden');
+        if (passportInput) passportInput.required = true;
       }
 
       // Reset Form fields
@@ -1892,6 +1920,9 @@
 
       // Load saved draft if it exists
       loadFormDraft(inst.id);
+
+      // Initialize drawing signature pad
+      initSignaturePad();
       
       // Default to "Form" tab
       switchFormTab('form');
@@ -1907,11 +1938,9 @@
     function closeFormGenerator() {
       document.getElementById('active-form-wrapper').classList.add('hidden');
       try {
-        if (window.location.protocol !== 'file:') {
-          window.history.pushState({ pageId: 'forms' }, '', '/forms');
-        }
+        window.location.hash = '#/forms';
       } catch (e) {
-        console.warn("history.pushState bypassed under local file protocol:", e);
+        console.warn("hash routing failed:", e);
       }
     }
 
@@ -2003,6 +2032,116 @@
         saveFormDraft();
       };
       reader.readAsDataURL(file);
+    }
+
+    // --- Interactive Digital Signature Pad ---
+    let signaturePad = null;
+    let signatureCtx = null;
+    let isDrawing = false;
+    let signatureBase64 = null;
+
+    function initSignaturePad() {
+      const canvas = document.getElementById('signature-pad');
+      if (!canvas) return;
+
+      signaturePad = canvas;
+      signatureCtx = canvas.getContext('2d');
+
+      // Adjust resolution for retina displays
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * 2;
+      canvas.height = rect.height * 2;
+      signatureCtx.scale(2, 2);
+
+      signatureCtx.strokeStyle = "#0f172a"; // Slate-900 stroke color
+      signatureCtx.lineWidth = 2.5;
+      signatureCtx.lineCap = "round";
+      signatureCtx.lineJoin = "round";
+
+      function getPos(e) {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const r = canvas.getBoundingClientRect();
+        return {
+          x: clientX - r.left,
+          y: clientY - r.top
+        };
+      }
+
+      function startDraw(e) {
+        isDrawing = true;
+        const pos = getPos(e);
+        signatureCtx.beginPath();
+        signatureCtx.moveTo(pos.x, pos.y);
+        // Prevent scrolling while drawing on touch screens
+        if (e.touches) e.preventDefault();
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+        const pos = getPos(e);
+        signatureCtx.lineTo(pos.x, pos.y);
+        signatureCtx.stroke();
+        if (e.touches) e.preventDefault();
+      }
+
+      function endDraw() {
+        if (isDrawing) {
+          isDrawing = false;
+          // Check if user drew anything, else set signature to null
+          if (isCanvasBlank()) {
+            signatureBase64 = null;
+          } else {
+            signatureBase64 = signaturePad.toDataURL('image/png');
+          }
+          saveFormDraft();
+        }
+      }
+
+      // Mouse Events
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
+      window.addEventListener('mouseup', endDraw);
+
+      // Touch Events
+      canvas.addEventListener('touchstart', startDraw, { passive: false });
+      canvas.addEventListener('touchmove', draw, { passive: false });
+      window.addEventListener('touchend', endDraw);
+    }
+
+    function clearSignaturePad() {
+      if (!signaturePad || !signatureCtx) return;
+      signatureCtx.clearRect(0, 0, signaturePad.width, signaturePad.height);
+      signatureBase64 = null;
+      saveFormDraft();
+    }
+
+    function restoreSignaturePad(base64) {
+      const canvas = document.getElementById('signature-pad');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.onload = function() {
+        // Draw at the scaled dimension (dividing canvas width/height by 2)
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width / 2, canvas.height / 2);
+      };
+      img.src = base64;
+    }
+
+    function clearSignatureCanvasOnly() {
+      const canvas = document.getElementById('signature-pad');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function isCanvasBlank() {
+      if (!signaturePad) return true;
+      const blank = document.createElement('canvas');
+      blank.width = signaturePad.width;
+      blank.height = signaturePad.height;
+      return signaturePad.toDataURL() === blank.toDataURL();
     }
 
     function getActiveFormData() {
@@ -2133,7 +2272,8 @@
       const draft = {
         schoolId: activeInstitution.id,
         formData: formData,
-        passportPhoto: passportPhotoBase64
+        passportPhoto: passportPhotoBase64,
+        signature: signatureBase64
       };
 
       localStorage.setItem(`elimu_form_draft_${activeInstitution.id}`, JSON.stringify(draft));
@@ -2176,6 +2316,14 @@
             placeholder.classList.remove('hidden');
           }
         }
+
+        // Restore signature drawing pad
+        signatureBase64 = draft.signature || null;
+        if (signatureBase64) {
+          restoreSignaturePad(signatureBase64);
+        } else {
+          clearSignatureCanvasOnly();
+        }
       } catch (e) {
         console.error("Error loading form draft:", e);
       }
@@ -2194,6 +2342,7 @@
           preview.classList.add('hidden');
           placeholder.classList.remove('hidden');
         }
+        clearSignaturePad();
       }
     }
 
@@ -2220,7 +2369,8 @@
       }
 
       const hasLogo = hasFeature('Custom Logo & Brand Colors') && rawLogo;
-      const pdfPassportPhoto = hasFeature('Custom Domain Support') ? passportPhotoBase64 : null;
+      const pdfPassportPhoto = passportPhotoBase64 || null; // Always show if uploaded
+      const pdfSignature = signatureBase64 || null; // Always show if drawn
 
       checkImageCORS(hasLogo ? rawLogo : '', function(isSafe) {
         const logoSrc = isSafe ? (hasLogo ? rawLogo : '') : '';
@@ -3193,10 +3343,14 @@
               <table class="pdf-signature-table">
                 <tr>
                   <td style="width: 45%; border-top: 1.2px solid #94a3b8; text-align: center; padding-top: 5px; font-weight: bold; color: #475569;">
+                    <div style="height: 32px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;"></div>
                     Applicant Signature &bull; Date: ______/______/2026
                   </td>
                   <td style="width: 10%;"></td>
                   <td style="width: 45%; border-top: 1.2px solid #94a3b8; text-align: center; padding-top: 5px; font-weight: bold; color: #475569;">
+                    <div style="height: 32px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;">
+                      ${pdfSignature ? `<img src="${pdfSignature}" style="max-height: 32px; max-width: 150px; object-fit: contain;" />` : ''}
+                    </div>
                     Sponsor / Guardian Signature &bull; Date: ______/______/2026
                   </td>
                 </tr>
@@ -3207,10 +3361,14 @@
               <table class="pdf-signature-table">
                 <tr>
                   <td style="width: 45%; border-top: 1.2px solid #94a3b8; text-align: center; padding-top: 5px; font-weight: bold; color: #475569;">
+                    <div style="height: 32px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;">
+                      ${pdfSignature ? `<img src="${pdfSignature}" style="max-height: 32px; max-width: 150px; object-fit: contain;" />` : ''}
+                    </div>
                     Sahihi ya Mzazi / Mlezi (Parent Signature) &bull; Tarehe: ______/______/2026
                   </td>
                   <td style="width: 10%;"></td>
                   <td style="width: 45%; border-top: 1.2px solid #94a3b8; text-align: center; padding-top: 5px; font-weight: bold; color: #475569;">
+                    <div style="height: 32px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;"></div>
                     Mwalimu Mkuu (Headmaster / Principal Signature) &bull; Tarehe: ______/______/2026
                   </td>
                 </tr>
@@ -3879,31 +4037,10 @@
 
     async function savePublicContents(updatedContents) {
       publicContents = updatedContents;
+      siteState.publicContents = updatedContents;
       localStorage.setItem('elimu_public_contents', JSON.stringify(updatedContents));
       applyPublicContents();
-
-      if (dbConnectionMode === 'cloudflare_kv' && adminToken) {
-        try {
-          const response = await fetch('/api/public-contents', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${adminToken}`
-            },
-            body: JSON.stringify({ data: updatedContents })
-          });
-          if (!response.ok) {
-            const errRes = await response.json().catch(() => ({}));
-            alert("❌ Database Save Error: Failed to sync public contents with Cloudflare KV. " + (errRes.error || ""));
-          } else {
-            alert("Public website contents saved successfully and updated live!");
-          }
-        } catch (err) {
-          alert("❌ Network Error: Could not sync public contents with Cloudflare KV.");
-        }
-      } else if (dbConnectionMode === 'local_storage') {
-        alert("⚠️ Local Storage Warning: Public contents saved locally only. Other people will NOT see this change until you connect Cloudflare KV database!");
-      }
+      await saveSiteState();
     }
 
     async function handlePublicContentsSave(e) {
@@ -4060,28 +4197,9 @@
     }
 
     async function saveCustomContentSections() {
+      siteState.customContents = customContentSections;
       localStorage.setItem('elimu_custom_content_sections', JSON.stringify(customContentSections));
-
-      if (dbConnectionMode === 'cloudflare_kv' && adminToken) {
-        try {
-          const response = await fetch('/api/custom-contents', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${adminToken}`
-            },
-            body: JSON.stringify({ data: customContentSections })
-          });
-          if (!response.ok) {
-            const errRes = await response.json().catch(() => ({}));
-            alert("❌ Database Save Error: Failed to sync custom sections with Cloudflare KV. " + (errRes.error || ""));
-          }
-        } catch (err) {
-          alert("❌ Network Error: Could not sync custom sections with Cloudflare KV.");
-        }
-      } else if (dbConnectionMode === 'local_storage') {
-        alert("⚠️ Local Storage Warning: Custom sections saved locally only. Other people will NOT see this change until you connect Cloudflare KV database!");
-      }
+      await saveSiteState();
     }
 
     function renderCmsTable() {
@@ -4788,9 +4906,12 @@
       let schoolId = params.get('school');
       const config = params.get('config');
 
-      // Clean path parsing (e.g. /tuangoma-primary or /school/tuangoma-primary)
+      // Hash routing parser (e.g. #/forms or #/forms/tuangoma-primary)
+      const hash = window.location.hash || '#/';
+      const hashPath = hash.replace(/^#/, ''); // Remove leading hash
+      const pathParts = hashPath.split('/').filter(p => p);
+
       if (!schoolId) {
-        const pathParts = window.location.pathname.split('/').filter(p => p);
         if (pathParts.length > 0) {
           const potentialId = pathParts[pathParts.length - 1].toLowerCase();
           
@@ -4798,6 +4919,10 @@
           const knownPages = ['forms', 'cms', 'pricing', 'contact', 'about', 'home'];
           if (knownPages.includes(potentialId)) {
             navigateTo(potentialId, false);
+            // Hide the embedded form if we route directly to forms page root
+            if (potentialId === 'forms') {
+              document.getElementById('active-form-wrapper').classList.add('hidden');
+            }
             return;
           }
 
@@ -4809,6 +4934,9 @@
           if (school) {
             schoolId = school.id;
           }
+        } else {
+          // If empty path, route to home
+          navigateTo('home', false);
         }
       }
 
@@ -4834,6 +4962,10 @@
         }, 150);
       }
     }
+
+    window.addEventListener('hashchange', () => {
+      checkUrlRouting();
+    });
 
     window.addEventListener('popstate', () => {
       checkUrlRouting();

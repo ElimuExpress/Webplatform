@@ -1,0 +1,30 @@
+- [x] Create Cloudflare Pages Function endpoint `functions/api/[[path]].js`
+- [x] Fix blank PDF issue in `index.html` by using `onclone` sandbox visibility styling
+- [x] Implement CORS preflight check for images to prevent tainted canvas SecurityErrors
+- [x] Add Passport Size photograph upload input and live preview box in the form UI
+- [x] Dynamically render the uploaded passport photo inside the PDF on the top right
+- [x] Overhaul PDF and form field layouts to match Tanzanian standards for all 4 school levels (Kindergarten, Primary, Secondary, Vocational)
+- [x] Add password protection, service duration gates, and dynamic SaaS pricing dashboards
+- [x] Implement clean path-based routing (e.g. `domain.com/school-slug`) and setup Cloudflare Pages SPA redirection rule `_redirects`
+- [x] Add custom URL slug input field in the CMS form to let administrators bind clean, custom routes manually
+- [x] Replace text URL inputs with file upload fields for Logos and Card Cover Photos, featuring live previews and automatic canvas image compression
+- [x] Rename the header navigation link from "Admin CMS" to "Login" to match standard SaaS portal entry formatting
+- [x] Add dynamic **Institution Letterhead Banner** uploader, storing compressed banners in Cloudflare KV
+- [x] Conditionally display the uploaded letterhead banner at the top of the A4 PDF registration form and the interactive frontend form wrapper
+- [x] Fix the empty PDF canvas generation bug by removing nested 0x0 wrappers and styling the compiling container directly as an offscreen absolute layer
+- [x] Enable 99.9% dynamic page pathname routing (`pushState` / `popstate`) for all main navigation pages (Home, About Us, School Forms, Pricing, Contacts, Login) and school forms
+- [x] Resolve syntax errors inside downloadFormPdf template string literals that caused JavaScript runtime crashes and blocked Lucide icons compilation
+- [x] Fix the `SecurityError` crash thrown by `pushState` under the `file://` local file protocol, enabling full offline/offline-preview support
+- [x] Correct the unclosed CSS grid container in the CMS panel to restore clean alignment and sidebar spacing
+- [x] Align the PDF registration forms with official Tanzanian standards (specifically matching Little Stars Nursery Form and Kilimahewa Secondary Form layouts)
+- [x] Re-architect html2pdf container rendering from `position: absolute` to `position: fixed` and implement asynchronous image pre-loaders (`imgPromises`) to guarantee zero blank PDF outputs
+- [x] Abstract system logo and name branding to a global code-level configuration object `SYSTEM_CONFIG` with support for custom SVG, Lucide icons, and image file paths
+- [x] Support favicon.jpg and logo.jpg paths inside the configuration, updating document head links dynamically and stripping default background colors to display custom logos as full-size avatars
+- [x] Clear all mock demo database institutions (`defaultInstitutions = []`) to ready the application for a clean production launch
+- [x] Rename client localStorage cache namespaces to `elimu_institutions_prod` and `elimu_pricing_prod` to fully isolate production environments and bypass browser-cached demo databases
+- [x] Integrate split Cloudflare Functions endpoints (/api/auth, /api/auth-change, /api/contacts, /api/content) and new siteState architecture into root-level _worker.js routing engine
+- [x] Convert dynamic HTML router in index.html and 404.html to a fully functional vanilla JS HashRouter (window.location.hash) to provide reliable client-side SPA routing across all web hosts without 404 rewrite rules
+- [x] Fix passport size photograph rendering in A4 PDF forms by removing the Premium tier checks (`hasFeature('Custom Domain Support')`) so they load globally on all packages
+- [x] Disable and visually gray out card submission buttons for expired or suspended schools
+- [x] Consolidate CMS public page texts and custom page block saves into the central `siteState` KV API endpoint (`/api/content`) to guarantee global, instant real-time syncs
+- [x] Design and embed an interactive HTML5 digital signature pad using stylus/mouse drawing, and render signatures directly inside PDF registration sheets
