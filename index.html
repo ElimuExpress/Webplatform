@@ -294,11 +294,11 @@
 
               <!-- Passport Photo Slot (Top Right Align) -->
               <div id="form-passport-preview-container" class="flex justify-end pr-2 -mb-2">
-                <div class="w-[100px] h-[125px] sm:w-[110px] sm:h-[135px] border-2 border-dashed border-gray-400 rounded bg-gray-50 flex items-center justify-center overflow-hidden shrink-0 relative shadow-inner">
-                  <img id="form-passport-preview" class="w-full h-full object-contain bg-white hidden" />
+                <div class="w-24 h-28 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center bg-slate-50 text-center p-1 overflow-hidden relative shadow-inner">
+                  <img id="form-passport-preview" class="w-full h-full object-contain hidden" />
                   <div id="form-passport-placeholder" class="text-[8px] text-slate-400 p-2 space-y-1">
                     <i data-lucide="camera" class="w-5 h-5 mx-auto text-slate-300"></i>
-                    <span class="lang-txt" data-en="Passport Photo" data-sw="Picha Pasipoti">Passport Photo</span>
+                    <span class="lang-txt" data-en="Passport Size Photo" data-sw="Picha ya Pasipoti">Passport Size Photo</span>
                   </div>
                 </div>
               </div>
@@ -1942,9 +1942,16 @@
       const passportErr = document.getElementById('passport-upload-error');
       if (passportErr) passportErr.classList.add('hidden');
 
+      // Show and scroll to form wrapper first to compute non-zero canvas dimensions
+      wrapper.classList.remove('hidden');
+      wrapper.scrollIntoView({ behavior: 'smooth' });
+
       // Load saved draft if it exists
       loadFormDraft(inst.id);
 
+      // Initialize drawing signature pad (now layout dimensions are non-zero!)
+      initSignaturePad();
+      
       // Load saved form tab or default to 'form'
       const params = new URLSearchParams(window.location.search);
       const savedTab = params.get('tab');
@@ -1956,13 +1963,6 @@
 
       // Update Language Switcher UI for default (EN)
       toggleFormLanguage('en');
-
-      // Show and scroll to form wrapper
-      wrapper.classList.remove('hidden');
-      wrapper.scrollIntoView({ behavior: 'smooth' });
-
-      // Initialize drawing signature pad once wrapper is visible
-      initSignaturePad();
     }
 
     function closeFormGenerator() {
@@ -2081,20 +2081,27 @@
       const canvas = document.getElementById('signature-pad');
       if (!canvas) return;
 
-      // Clone canvas to clear stacked event listeners
-      const newCanvas = canvas.cloneNode(true);
-      canvas.parentNode.replaceChild(newCanvas, canvas);
+      signaturePad = canvas;
+      signatureCtx = canvas.getContext('2d');
 
-      signaturePad = newCanvas;
-      signatureCtx = newCanvas.getContext('2d');
+      // Adjust resolution for retina displays
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * 2;
+      canvas.height = rect.height * 2;
+      signatureCtx.scale(2, 2);
+
+      signatureCtx.strokeStyle = "#0f172a"; // Slate-900 stroke color
+      signatureCtx.lineWidth = 2.5;
+      signatureCtx.lineCap = "round";
+      signatureCtx.lineJoin = "round";
 
       function getPos(e) {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        const r = newCanvas.getBoundingClientRect();
+        const r = canvas.getBoundingClientRect();
         return {
-          x: (clientX - r.left) * (newCanvas.width / (r.width || 1)),
-          y: (clientY - r.top) * (newCanvas.height / (r.height || 1))
+          x: clientX - r.left,
+          y: clientY - r.top
         };
       }
 
@@ -2103,6 +2110,7 @@
         const pos = getPos(e);
         signatureCtx.beginPath();
         signatureCtx.moveTo(pos.x, pos.y);
+        // Prevent scrolling while drawing on touch screens
         if (e.touches) e.preventDefault();
       }
 
@@ -2117,6 +2125,7 @@
       function endDraw() {
         if (isDrawing) {
           isDrawing = false;
+          // Check if user drew anything, else set signature to null
           if (isCanvasBlank()) {
             signatureBase64 = null;
           } else {
@@ -2126,33 +2135,14 @@
         }
       }
 
-      // Initialize dimensions safely after DOM reflow has occurred
-      setTimeout(() => {
-        const rect = newCanvas.getBoundingClientRect();
-        const w = rect.width || newCanvas.clientWidth || 300;
-        const h = rect.height || newCanvas.clientHeight || 120;
-        
-        newCanvas.width = w * 2;
-        newCanvas.height = h * 2;
-
-        signatureCtx.strokeStyle = "#0f172a";
-        signatureCtx.lineWidth = 4; // thicker line for standard signature looks
-        signatureCtx.lineCap = "round";
-        signatureCtx.lineJoin = "round";
-
-        if (signatureBase64) {
-          restoreSignaturePad(signatureBase64);
-        }
-      }, 250);
-
       // Mouse Events
-      newCanvas.addEventListener('mousedown', startDraw);
-      newCanvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
       window.addEventListener('mouseup', endDraw);
 
       // Touch Events
-      newCanvas.addEventListener('touchstart', startDraw, { passive: false });
-      newCanvas.addEventListener('touchmove', draw, { passive: false });
+      canvas.addEventListener('touchstart', startDraw, { passive: false });
+      canvas.addEventListener('touchmove', draw, { passive: false });
       window.addEventListener('touchend', endDraw);
     }
 
@@ -2169,8 +2159,9 @@
       const ctx = canvas.getContext('2d');
       const img = new Image();
       img.onload = function() {
+        // Draw at the scaled dimension (dividing canvas width/height by 2)
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width / 2, canvas.height / 2);
       };
       img.src = base64;
     }
@@ -2517,8 +2508,8 @@
                   <div class="pdf-form-title" style="font-size: 9px; font-weight: 800; border-bottom: 1.5px solid ${primary}; padding-bottom: 2px; display: inline-block;">${levelTitle}</div>
                 </td>
                 <td style="width: 30%; vertical-align: top;">
-                  <div class="pdf-passport-box" style="margin-top: 0; margin-bottom: 0; height: 130px; width: 105px;">
-                    ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" crossorigin="anonymous" />` : passportText}
+                  <div class="pdf-passport-box" style="margin-top: 0; margin-bottom: 0; height: 95px; width: 85px;">
+                    ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" />` : passportText}
                   </div>
                 </td>
               </tr>
@@ -2541,7 +2532,7 @@
                 </td>
                 <td style="width: 30%; vertical-align: top;">
                   <div class="pdf-passport-box">
-                    ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" crossorigin="anonymous" />` : passportText}
+                    ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" />` : passportText}
                   </div>
                 </td>
               </tr>
@@ -2597,30 +2588,27 @@
               margin: 2px 0 0 0;
             }
             .pdf-passport-box {
-              width: 105px;
-              height: 130px;
-              border: 1.5px dashed #94a3b8;
+              width: 95px;
+              height: 110px;
+              border: 1.5px dashed #475569;
               display: flex;
               flex-direction: column;
-              flex-shrink: 0;
               align-items: center;
               justify-content: center;
               text-align: center;
-              font-size: 7.5px;
+              font-size: 7px;
               font-weight: bold;
               color: #64748b;
               background: #f8fafc;
               box-sizing: border-box;
               margin: 0 0 0 auto;
               overflow: hidden;
-              break-inside: avoid;
-              page-break-inside: avoid;
             }
             .pdf-passport-img {
               width: 100%;
               height: 100%;
               object-fit: contain;
-              background-color: #ffffff;
+              background-color: #f8fafc;
               display: block;
             }
             .pdf-meta-bar {
@@ -3504,22 +3492,10 @@
         // Await loading of all images (logo, letterhead, passport) before starting canvas compile
         const pdfImages = tempDiv.querySelectorAll('img');
         const imgPromises = Array.from(pdfImages).map(img => {
-          if (img.complete) {
-            if (typeof img.decode === 'function') {
-              return img.decode().catch(() => {});
-            }
-            return Promise.resolve();
-          }
+          if (img.complete) return Promise.resolve();
           return new Promise(resolve => {
             const timeoutId = setTimeout(resolve, 5000); // 5s timeout safeguard
-            img.onload = () => {
-              clearTimeout(timeoutId);
-              if (typeof img.decode === 'function') {
-                img.decode().then(resolve).catch(resolve);
-              } else {
-                resolve();
-              }
-            };
+            img.onload = () => { clearTimeout(timeoutId); resolve(); };
             img.onerror = () => { clearTimeout(timeoutId); resolve(); };
           });
         });

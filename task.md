@@ -31,6 +31,5 @@
 - [x] Implement history state URL parameter tab-preservation for CMS admin dashboard views and school form tabs to automatically restore viewing context on page reloads
 - [x] Integrate platform support phone, support email, and office location address into the CMS content manager form to keep them fully configurable
 - [x] Add Registration Number and P.O. Box fields inside the CMS institution builder form, rendering them dynamically inside the PDF header when no letterhead banner is configured
-- [x] Lock passport photo slots to fixed aspect-ratio dimensions (`120px` x `150px`), set `object-fit: cover`, enable print-split avoidance (`break-inside: avoid`), and integrate asynchronous `img.decode()` safety loaders into the PDF builder
-- [x] Adjust passport photo slot styles to responsive containment boundaries (`w-[100px] h-[125px]` / `105px` x `130px`), enable `shrink-0`, change to `object-fit: contain`, and apply white backdrops to eliminate horizontal cropping
-- [x] Fix the signature pad sizing initialization race condition by deferring dimensional bindings using setTimeout, clearing listener stacking via node cloning, and resolving pixel coordinate scaling on redraws
+- [x] Resolve signature drawing pad canvas sizing conflict by reordering layout visibility sequences before initSignaturePad execution
+- [x] Apply object-fit: contain to frontend and A4 PDF passport photo slots to ensure uploaded images render fully without cropping
