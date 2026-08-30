@@ -31,3 +31,4 @@
 - [x] Implement history state URL parameter tab-preservation for CMS admin dashboard views and school form tabs to automatically restore viewing context on page reloads
 - [x] Integrate platform support phone, support email, and office location address into the CMS content manager form to keep them fully configurable
 - [x] Add Registration Number and P.O. Box fields inside the CMS institution builder form, rendering them dynamically inside the PDF header when no letterhead banner is configured
+- [x] Redesign school letterhead details inside the A4 PDF header layout, center-aligning logo and text, and positioning the passport photo slot exactly 1.5cm below details

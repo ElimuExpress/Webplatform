@@ -2501,42 +2501,51 @@
         let headerHtml = '';
         if (activeInstitution.letterhead && activeInstitution.letterhead.trim() !== '' && hasFeature('Custom Domain Support')) {
           headerHtml = `
-            <img src="${activeInstitution.letterhead}" crossorigin="anonymous" style="width: 100%; height: auto; max-height: 100px; object-fit: contain; margin-bottom: 6px; display: block;" />
-            <table class="pdf-header-table" style="margin-bottom: 4px;">
-              <tr>
-                <td class="pdf-header-text" style="width: 70%; vertical-align: middle;">
-                  <div class="pdf-form-title" style="font-size: 9px; font-weight: 800; border-bottom: 1.5px solid ${primary}; padding-bottom: 2px; display: inline-block;">${levelTitle}</div>
-                </td>
-                <td style="width: 30%; vertical-align: top;">
-                  <div class="pdf-passport-box" style="margin-top: 0; margin-bottom: 0; height: 95px; width: 85px;">
-                    ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" />` : passportText}
-                  </div>
-                </td>
-              </tr>
-            </table>
+            <img src="${activeInstitution.letterhead}" crossorigin="anonymous" style="width: 100%; height: auto; max-height: 100px; object-fit: contain; display: block;" />
+            <div style="margin-top: 1.5cm; display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 10px;">
+              <!-- Form Title Left -->
+              <div style="width: 70%; text-align: left; padding-bottom: 10px;">
+                <div class="pdf-form-title" style="font-size: 11px; font-weight: 850; text-transform: uppercase; color: ${primary}; border-bottom: 1.5px solid ${primary}; padding-bottom: 3px; display: inline-block;">
+                  ${levelTitle}
+                </div>
+                <p style="font-size: 7.5px; color: #64748b; margin: 3px 0 0 0;">${subTitle}</p>
+              </div>
+              <!-- Passport Photo Right -->
+              <div style="width: 30%; display: flex; justify-content: flex-end;">
+                <div class="pdf-passport-box" style="margin: 0; height: 95px; width: 85px; border: 1.5px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 6.5px; font-weight: bold; color: #64748b; background: #f8fafc; line-height: 1.2; box-sizing: border-box; border-radius: 4px; overflow: hidden;">
+                  ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" style="width: 100%; height: 100%; object-fit: cover; display: block;" />` : passportText}
+                </div>
+              </div>
+            </div>
           `;
         } else {
           headerHtml = `
-            <table class="pdf-header-table">
-              <tr>
-                <td class="pdf-header-text" style="width: 70%;">
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    ${logoSrc ? `<img src="${logoSrc}" crossorigin="anonymous" style="width: 48px; height: 48px; border-radius: 6px; object-fit: cover;" />` : `<div style="width: 48px; height: 48px; border-radius: 6px; background: ${primary}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 850; font-size: 18px;">${initials}</div>`}
-                    <div>
-                      <div class="pdf-header-flag">${headerFlag}</div>
-                      <h2 class="pdf-school-title">${activeInstitution.name}</h2>
-                      <p class="pdf-school-meta">Reg No: ${activeInstitution.regNo || 'N/A'} &bull; S.L.P / P.O. Box: ${activeInstitution.poBox || 'N/A'}, ${activeInstitution.region || 'Tanzania'} &bull; Email: ${activeInstitution.email} &bull; Simu: +${activeInstitution.phone}</p>
-                      <div class="pdf-form-title">${levelTitle}</div>
-                    </div>
-                  </div>
-                </td>
-                <td style="width: 30%; vertical-align: top;">
-                  <div class="pdf-passport-box">
-                    ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" />` : passportText}
-                  </div>
-                </td>
-              </tr>
-            </table>
+            <div class="pdf-header-flag" style="text-align: center; font-size: 8px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; color: #475569; margin-bottom: 4px;">${headerFlag}</div>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-bottom: 1.5px solid ${primary}; padding-bottom: 8px; margin-bottom: 10px;">
+              ${logoSrc ? `<img src="${logoSrc}" crossorigin="anonymous" style="width: 50px; height: 50px; border-radius: 6px; object-fit: cover; margin-bottom: 6px;" />` : `<div style="width: 50px; height: 50px; border-radius: 6px; background: ${primary}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 850; font-size: 20px; margin-bottom: 6px;">${initials}</div>`}
+              <h2 class="pdf-school-title" style="font-size: 15px; font-weight: 850; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 3px 0; line-height: 1.1;">${activeInstitution.name}</h2>
+              <p class="pdf-school-meta" style="font-size: 8px; color: #475569; margin: 0; line-height: 1.2;">
+                <strong>Namba ya Usajili / Reg No:</strong> ${activeInstitution.regNo || 'N/A'} &bull; 
+                <strong>S.L.P / P.O. Box:</strong> ${activeInstitution.poBox || 'N/A'}, ${activeInstitution.region || 'Tanzania'} <br/>
+                <strong>Email:</strong> ${activeInstitution.email} &bull; 
+                <strong>Simu / Tel:</strong> +${activeInstitution.phone}
+              </p>
+            </div>
+            <div style="margin-top: 1.5cm; display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 10px;">
+              <!-- Form Title Left -->
+              <div style="width: 70%; text-align: left; padding-bottom: 10px;">
+                <div class="pdf-form-title" style="font-size: 11px; font-weight: 850; text-transform: uppercase; color: ${primary}; border-bottom: 1.5px solid ${primary}; padding-bottom: 3px; display: inline-block;">
+                  ${levelTitle}
+                </div>
+                <p style="font-size: 7.5px; color: #64748b; margin: 3px 0 0 0;">${subTitle}</p>
+              </div>
+              <!-- Passport Photo Right -->
+              <div style="width: 30%; display: flex; justify-content: flex-end;">
+                <div class="pdf-passport-box" style="margin: 0; height: 95px; width: 85px; border: 1.5px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 6.5px; font-weight: bold; color: #64748b; background: #f8fafc; line-height: 1.2; box-sizing: border-box; border-radius: 4px; overflow: hidden;">
+                  ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" style="width: 100%; height: 100%; object-fit: cover; display: block;" />` : passportText}
+                </div>
+              </div>
+            </div>
           `;
         }
 
