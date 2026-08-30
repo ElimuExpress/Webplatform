@@ -292,16 +292,6 @@
               <input type="hidden" id="target-phone" value="" />
               <input type="hidden" id="target-email" value="" />
 
-              <!-- Passport Photo Slot (Top Right Align) -->
-              <div id="form-passport-preview-container" class="flex justify-end pr-2 -mb-2">
-                <div class="w-24 h-28 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center bg-slate-50 text-center p-1 overflow-hidden relative shadow-inner">
-                  <img id="form-passport-preview" class="w-full h-full object-contain hidden" />
-                  <div id="form-passport-placeholder" class="text-[8px] text-slate-400 p-2 space-y-1">
-                    <i data-lucide="camera" class="w-5 h-5 mx-auto text-slate-300"></i>
-                    <span class="lang-txt" data-en="Passport Size Photo" data-sw="Picha ya Pasipoti">Passport Size Photo</span>
-                  </div>
-                </div>
-              </div>
 
               <!-- Student Data -->
               <div>
@@ -345,10 +335,20 @@
                     <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Residential Address (Region, District, Street) *" data-sw="Makazi (Mkoa, Wilaya, Mtaa/Kijiji) *">Residential Address (Region, District, Street) *</span></label>
                     <input type="text" id="form-location" placeholder="e.g. Dar es Salaam, Kigamboni, Tuangoma" data-placeholder-en="e.g. Dar es Salaam, Kigamboni, Tuangoma" data-placeholder-sw="Mfano: Dar es Salaam, Kigamboni, Tuangoma" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
                   </div>
-                  <div id="form-passport-upload-container">
+                  <div id="form-passport-upload-container" class="sm:col-span-2">
                     <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Passport Photograph (Max 1MB) *" data-sw="Picha ya Pasipoti (Max 1MB) *">Passport Photograph (Max 1MB) *</span></label>
-                    <input type="file" id="form-passport-photo" accept="image/*" onchange="handlePassportUpload(event)" required class="mt-1 w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" />
+                    <input type="file" id="form-passport-photo" accept="image/*" onchange="handlePassportUpload(event)" class="mt-1 w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" />
                     <p id="passport-upload-error" class="hidden text-[10px] text-red-600 mt-1 font-semibold"></p>
+                  </div>
+                  <!-- Squeezed Passport Preview Box -->
+                  <div id="form-passport-preview-container" class="flex justify-start sm:justify-center items-end pb-1">
+                    <div class="w-16 h-20 border border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center bg-slate-50 text-center p-0.5 overflow-hidden relative shadow-inner shrink-0">
+                      <img id="form-passport-preview" class="w-full h-full object-contain hidden" />
+                      <div id="form-passport-placeholder" class="text-[7px] text-slate-400 p-1 space-y-0.5">
+                        <i data-lucide="camera" class="w-3.5 h-3.5 mx-auto text-slate-350"></i>
+                        <span class="lang-txt" data-en="Passport Preview" data-sw="Hakiki Picha">Passport Preview</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -430,8 +430,22 @@
                   <!-- Vocational fields -->
                   <div id="fields-vocational" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
+                      <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Program to Pursue *" data-sw="Kozi ya Kusomea *">Program to Pursue *</span></label>
+                      <select id="form-voc-program" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        <!-- Populated dynamically -->
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Applicant's Phone Number *" data-sw="Namba ya Simu ya Mwombaji *">Applicant's Phone Number *</span></label>
+                      <input type="tel" id="form-voc-phone" required placeholder="07XXXXXXXX" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Applicant's Email Address *" data-sw="Barua Pepe ya Mwombaji *">Applicant's Email Address *</span></label>
+                      <input type="email" id="form-voc-email" required placeholder="applicant@email.com" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                    <div>
                       <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="CSEE (Form 4) Index No *" data-sw="Namba ya Mtihani Kidato cha 4 (CSEE) *">CSEE (Form 4) Index No *</span></label>
-                      <input type="text" id="form-voc-necta" placeholder="e.g. S1234/0056/2025" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                      <input type="text" id="form-voc-necta" required placeholder="e.g. S1234/0056/2025" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
                     </div>
                     <div>
                       <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="ACSEE (Form 6) Index No" data-sw="Namba ya Mtihani Kidato cha 6 (ACSEE)">ACSEE (Form 6) Index No</span></label>
@@ -543,21 +557,34 @@
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <!-- Digital Signature Drawer Canvas -->
+                  <!-- Digital Signature Drawer Canvas 1 -->
                   <div class="border rounded-xl p-4 bg-slate-50 flex flex-col justify-between">
                     <label class="block text-xs font-bold text-slate-700 mb-1">
-                      <span class="lang-txt" data-en="Parent / Guardian Digital Signature (Draw below) *" data-sw="Sahihi ya Kidijitali ya Mzazi / Mlezi (Chora chini) *">Parent / Guardian Digital Signature (Draw below) *</span>
+                      <span id="form-signature-label-1" class="lang-txt" data-en="Parent / Guardian Digital Signature (Draw below) *" data-sw="Sahihi ya Kidijitali ya Mzazi / Mlezi (Chora chini) *">Parent / Guardian Digital Signature (Draw below) *</span>
                     </label>
                     <div class="relative bg-white border border-slate-300 rounded-lg overflow-hidden h-32 flex-grow">
                       <canvas id="signature-pad" class="w-full h-full cursor-crosshair touch-none"></canvas>
-                      <button type="button" onclick="clearSignaturePad()" class="absolute bottom-2 right-2 px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-[10px] font-semibold text-slate-700 rounded-md transition shadow-sm">
+                      <button type="button" onclick="clearSignaturePad()" class="absolute bottom-2 right-2 px-2.5 py-1 bg-slate-200 hover:bg-slate-350 text-[10px] font-semibold text-slate-700 rounded-md transition shadow-sm">
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Digital Signature Drawer Canvas 2 (Vocational Only) -->
+                  <div id="form-signature-box-parent" class="hidden border rounded-xl p-4 bg-slate-50 flex flex-col justify-between">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">
+                      <span class="lang-txt" data-en="Parent / Guardian / Sponsor Digital Signature (Draw below) *" data-sw="Sahihi ya Mzazi / Mlezi / Mdhamini (Chora chini) *">Parent / Guardian / Sponsor Digital Signature (Draw below) *</span>
+                    </label>
+                    <div class="relative bg-white border border-slate-300 rounded-lg overflow-hidden h-32 flex-grow">
+                      <canvas id="signature-pad-parent" class="w-full h-full cursor-crosshair touch-none"></canvas>
+                      <button type="button" onclick="clearSignaturePadParent()" class="absolute bottom-2 right-2 px-2.5 py-1 bg-slate-200 hover:bg-slate-350 text-[10px] font-semibold text-slate-700 rounded-md transition shadow-sm">
                         Clear
                       </button>
                     </div>
                   </div>
                   
                   <!-- Signature Date Info or Instruction -->
-                  <div class="border rounded-xl p-4 bg-slate-50 flex flex-col justify-center space-y-2 text-xs text-slate-500">
+                  <div id="form-signature-instructions" class="border rounded-xl p-4 bg-slate-50 flex flex-col justify-center space-y-2 text-xs text-slate-500">
                     <p class="font-semibold text-slate-700">Maelekezo / Instructions:</p>
                     <ul class="list-disc pl-4 space-y-1">
                       <li>Tumia skrini ya mguso, stylus au panya kuchora sahihi yako kwenye sanduku. / Use your touchscreen, stylus, or mouse to draw your signature.</li>
@@ -821,6 +848,12 @@
                   </div>
                 </div>
 
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-700">Courses/Programs Offered (Comma-separated, for Colleges/Vocational)</label>
+                  <textarea id="cms-programs" placeholder="e.g. Certificate in Nursing, Diploma in Clinical Medicine, Basic Driving" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" rows="2"></textarea>
+                  <p class="text-[9px] text-slate-400 mt-0.5">Separate multiple programs/courses with commas. These will appear in the applicant's program dropdown.</p>
+                </div>
+
                 <div class="grid grid-cols-2 gap-2">
                   <div>
                     <label class="block text-[11px] font-bold text-slate-700">Service Status *</label>
@@ -906,8 +939,18 @@
                 </div>
 
                 <div>
-                  <label class="block text-[11px] font-bold text-slate-700">Joining Instructions *</label>
-                  <textarea id="cms-joining" rows="2" required placeholder="Fees, requirements, school regulations..." class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                  <div class="flex justify-between items-center mb-1">
+                    <label class="block text-[11px] font-bold text-slate-700">Joining Instructions *</label>
+                    <div class="flex items-center gap-1">
+                      <button type="button" onclick="insertFormat('bold')" class="p-1 px-2 text-[9px] bg-slate-100 hover:bg-slate-200 border rounded font-extrabold text-slate-700 transition" title="Bold">B</button>
+                      <button type="button" onclick="insertFormat('italic')" class="p-1 px-2 text-[9px] bg-slate-100 hover:bg-slate-200 border rounded italic font-semibold text-slate-700 transition" title="Italic">I</button>
+                      <button type="button" onclick="insertFormat('underline')" class="p-1 px-2 text-[9px] bg-slate-100 hover:bg-slate-200 border rounded underline font-semibold text-slate-700 transition" title="Underline">U</button>
+                      <button type="button" onclick="insertFormat('heading')" class="p-1 px-2 text-[9px] bg-slate-100 hover:bg-slate-200 border rounded font-semibold text-slate-700 transition" title="Heading">H</button>
+                      <button type="button" onclick="insertFormat('bullet')" class="p-1 px-2 text-[9px] bg-slate-100 hover:bg-slate-200 border rounded font-semibold text-slate-700 transition" title="Bullet List">• List</button>
+                      <button type="button" onclick="insertFormat('line')" class="p-1 px-2 text-[9px] bg-slate-100 hover:bg-slate-200 border rounded font-semibold text-slate-700 transition" title="Horizontal Line">Line</button>
+                    </div>
+                  </div>
+                  <textarea id="cms-joining" rows="3" required placeholder="Fees, requirements, school regulations..." class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
                 </div>
 
                 <div>
@@ -1871,7 +1914,7 @@
       document.getElementById('target-email').value = inst.email;
 
       // Set customizable joining instructions text
-      document.getElementById('form-joining-text-content').textContent = inst.joining || "No joining instructions registered for this school.";
+      document.getElementById('form-joining-text-content').innerHTML = inst.joining ? inst.joining.replace(/\n/g, '<br/>') : "No joining instructions registered for this school.";
 
       // Show level specific fields (Tanzania Admissions Standards)
       document.getElementById('fields-kindergarten').classList.add('hidden');
@@ -1882,6 +1925,41 @@
       const levelFieldsContainer = document.getElementById(`fields-${inst.category}`);
       if (levelFieldsContainer) {
         levelFieldsContainer.classList.remove('hidden');
+      }
+
+      // Populate vocational programs select options dropdown
+      if (inst.category === 'vocational') {
+        const programSelect = document.getElementById('form-voc-program');
+        if (programSelect) {
+          programSelect.innerHTML = '';
+          const progString = inst.programs || '';
+          const progArray = progString.split(',')
+            .map(p => p.trim())
+            .filter(p => p.length > 0);
+          
+          if (progArray.length === 0) {
+            const defaults = [
+              "Certificate in Information Technology (IT)",
+              "Diploma in Business Administration",
+              "Certificate in Journalism",
+              "Diploma in Hotel Management",
+              "Short Course in Computer Applications"
+            ];
+            defaults.forEach(d => {
+              const opt = document.createElement('option');
+              opt.value = d;
+              opt.textContent = d;
+              programSelect.appendChild(opt);
+            });
+          } else {
+            progArray.forEach(p => {
+              const opt = document.createElement('option');
+              opt.value = p;
+              opt.textContent = p;
+              programSelect.appendChild(opt);
+            });
+          }
+        }
       }
 
       // Reset form controls and apply custom branding colors based on package
@@ -1920,11 +1998,9 @@
       // Setup Passport Photograph field (always active for Tanzanian admission requirements)
       const passportPreviewCont = document.getElementById('form-passport-preview-container');
       const passportUploadCont = document.getElementById('form-passport-upload-container');
-      const passportInput = document.getElementById('form-passport-photo');
       if (passportPreviewCont && passportUploadCont) {
         passportPreviewCont.classList.remove('hidden');
         passportUploadCont.classList.remove('hidden');
-        if (passportInput) passportInput.required = true;
       }
 
       // Reset Form fields
@@ -1942,6 +2018,29 @@
       const passportErr = document.getElementById('passport-upload-error');
       if (passportErr) passportErr.classList.add('hidden');
 
+      // Configure dynamic signature pads layout based on category
+      const label1 = document.getElementById('form-signature-label-1');
+      const boxParent = document.getElementById('form-signature-box-parent');
+      const instructions = document.getElementById('form-signature-instructions');
+      
+      if (inst.category === 'vocational') {
+        if (label1) {
+          label1.setAttribute('data-en', "Applicant / Student Digital Signature (Draw below) *");
+          label1.setAttribute('data-sw', "Sahihi ya Kidijitali ya Mwombaji / Mwanafunzi (Chora chini) *");
+          label1.textContent = "Applicant / Student Digital Signature (Draw below) *";
+        }
+        if (boxParent) boxParent.classList.remove('hidden');
+        if (instructions) instructions.classList.add('hidden');
+      } else {
+        if (label1) {
+          label1.setAttribute('data-en', "Parent / Guardian Digital Signature (Draw below) *");
+          label1.setAttribute('data-sw', "Sahihi ya Kidijitali ya Mzazi / Mlezi (Chora chini) *");
+          label1.textContent = "Parent / Guardian Digital Signature (Draw below) *";
+        }
+        if (boxParent) boxParent.classList.add('hidden');
+        if (instructions) instructions.classList.remove('hidden');
+      }
+
       // Show and scroll to form wrapper first to compute non-zero canvas dimensions
       wrapper.classList.remove('hidden');
       wrapper.scrollIntoView({ behavior: 'smooth' });
@@ -1949,8 +2048,13 @@
       // Load saved draft if it exists
       loadFormDraft(inst.id);
 
-      // Initialize drawing signature pad (now layout dimensions are non-zero!)
-      initSignaturePad();
+      // Initialize drawing signature pads with delay to guarantee layout calculations
+      setTimeout(() => {
+        initSignaturePad();
+        if (inst.category === 'vocational') {
+          initSignaturePadParent();
+        }
+      }, 50);
       
       // Load saved form tab or default to 'form'
       const params = new URLSearchParams(window.location.search);
@@ -2086,14 +2190,25 @@
 
       // Adjust resolution for retina displays
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * 2;
-      canvas.height = rect.height * 2;
-      signatureCtx.scale(2, 2);
+      if (rect.width > 0 && rect.height > 0) {
+        canvas.width = rect.width * 2;
+        canvas.height = rect.height * 2;
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        
+        signatureCtx.scale(2, 2);
+      }
 
       signatureCtx.strokeStyle = "#0f172a"; // Slate-900 stroke color
       signatureCtx.lineWidth = 2.5;
       signatureCtx.lineCap = "round";
       signatureCtx.lineJoin = "round";
+
+      // Prevent listener aggregation on window/canvas
+      canvas.removeEventListener('mousedown', startDraw);
+      canvas.removeEventListener('mousemove', draw);
+      canvas.removeEventListener('touchstart', startDraw);
+      canvas.removeEventListener('touchmove', draw);
 
       function getPos(e) {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -2138,12 +2253,43 @@
       // Mouse Events
       canvas.addEventListener('mousedown', startDraw);
       canvas.addEventListener('mousemove', draw);
+      window.removeEventListener('mouseup', endDraw);
       window.addEventListener('mouseup', endDraw);
 
       // Touch Events
       canvas.addEventListener('touchstart', startDraw, { passive: false });
       canvas.addEventListener('touchmove', draw, { passive: false });
+      window.removeEventListener('touchend', endDraw);
       window.addEventListener('touchend', endDraw);
+    }
+
+    function insertFormat(format) {
+      const txtarea = document.getElementById('cms-joining');
+      if (!txtarea) return;
+      const start = txtarea.selectionStart;
+      const end = txtarea.selectionEnd;
+      const text = txtarea.value;
+      const selected = text.substring(start, end);
+      
+      let replacement = '';
+      if (format === 'bold') {
+        replacement = `<b>${selected || 'Bold Text'}</b>`;
+      } else if (format === 'italic') {
+        replacement = `<i>${selected || 'Italic Text'}</i>`;
+      } else if (format === 'underline') {
+        replacement = `<u>${selected || 'Underline Text'}</u>`;
+      } else if (format === 'heading') {
+        replacement = `\n<h3 style="font-size: 11px; margin-top: 10px; margin-bottom: 4px; color: #1e293b;">${selected || 'Heading Title'}</h3>\n`;
+      } else if (format === 'bullet') {
+        replacement = `\n• ${selected || 'List item'}\n`;
+      } else if (format === 'line') {
+        replacement = `\n<hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 10px 0;" />\n`;
+      }
+      
+      txtarea.value = text.substring(0, start) + replacement + text.substring(end);
+      txtarea.focus();
+      txtarea.selectionStart = start;
+      txtarea.selectionEnd = start + replacement.length;
     }
 
     function clearSignaturePad() {
@@ -2159,18 +2305,130 @@
       const ctx = canvas.getContext('2d');
       const img = new Image();
       img.onload = function() {
-        // Draw at the scaled dimension (dividing canvas width/height by 2)
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width / 2, canvas.height / 2);
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset scale
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.restore(); // Restore scale
+      };
+      img.src = base64;
+    }
+
+    // --- Parent/Guardian/Sponsor Signature Pad Helpers ---
+    let signaturePadParent = null;
+    let signatureCtxParent = null;
+    let isDrawingParent = false;
+    let signatureParentBase64 = null;
+
+    function initSignaturePadParent() {
+      const canvas = document.getElementById('signature-pad-parent');
+      if (!canvas) return;
+
+      signaturePadParent = canvas;
+      signatureCtxParent = canvas.getContext('2d');
+
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        canvas.width = rect.width * 2;
+        canvas.height = rect.height * 2;
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        
+        signatureCtxParent.scale(2, 2);
+      }
+
+      signatureCtxParent.strokeStyle = "#0f172a";
+      signatureCtxParent.lineWidth = 2.5;
+      signatureCtxParent.lineCap = "round";
+      signatureCtxParent.lineJoin = "round";
+
+      canvas.removeEventListener('mousedown', startDrawParent);
+      canvas.removeEventListener('mousemove', drawParent);
+      canvas.removeEventListener('touchstart', startDrawParent);
+      canvas.removeEventListener('touchmove', drawParent);
+
+      function getPos(e) {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const r = canvas.getBoundingClientRect();
+        return {
+          x: clientX - r.left,
+          y: clientY - r.top
+        };
+      }
+
+      function startDrawParent(e) {
+        isDrawingParent = true;
+        const pos = getPos(e);
+        signatureCtxParent.beginPath();
+        signatureCtxParent.moveTo(pos.x, pos.y);
+        if (e.touches) e.preventDefault();
+      }
+
+      function drawParent(e) {
+        if (!isDrawingParent) return;
+        const pos = getPos(e);
+        signatureCtxParent.lineTo(pos.x, pos.y);
+        signatureCtxParent.stroke();
+        if (e.touches) e.preventDefault();
+      }
+
+      function endDrawParent() {
+        if (isDrawingParent) {
+          isDrawingParent = false;
+          if (isCanvasBlankParent()) {
+            signatureParentBase64 = null;
+          } else {
+            signatureParentBase64 = signaturePadParent.toDataURL('image/png');
+          }
+          saveFormDraft();
+        }
+      }
+
+      canvas.addEventListener('mousedown', startDrawParent);
+      canvas.addEventListener('mousemove', drawParent);
+      window.removeEventListener('mouseup', endDrawParent);
+      window.addEventListener('mouseup', endDrawParent);
+
+      canvas.addEventListener('touchstart', startDrawParent, { passive: false });
+      canvas.addEventListener('touchmove', drawParent, { passive: false });
+      window.removeEventListener('touchend', endDrawParent);
+      window.addEventListener('touchend', endDrawParent);
+    }
+
+    function clearSignaturePadParent() {
+      if (!signaturePadParent || !signatureCtxParent) return;
+      signatureCtxParent.clearRect(0, 0, signaturePadParent.width, signaturePadParent.height);
+      signatureParentBase64 = null;
+      saveFormDraft();
+    }
+
+    function restoreSignaturePadParent(base64) {
+      const canvas = document.getElementById('signature-pad-parent');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.onload = function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset scale
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.restore(); // Restore scale
       };
       img.src = base64;
     }
 
     function clearSignatureCanvasOnly() {
       const canvas = document.getElementById('signature-pad');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      const canvasParent = document.getElementById('signature-pad-parent');
+      if (canvasParent) {
+        const ctxP = canvasParent.getContext('2d');
+        ctxP.clearRect(0, 0, canvasParent.width, canvasParent.height);
+      }
     }
 
     function isCanvasBlank() {
@@ -2179,6 +2437,14 @@
       blank.width = signaturePad.width;
       blank.height = signaturePad.height;
       return signaturePad.toDataURL() === blank.toDataURL();
+    }
+
+    function isCanvasBlankParent() {
+      if (!signaturePadParent) return true;
+      const blank = document.createElement('canvas');
+      blank.width = signaturePadParent.width;
+      blank.height = signaturePadParent.height;
+      return signaturePadParent.toDataURL() === blank.toDataURL();
     }
 
     function getActiveFormData() {
@@ -2197,8 +2463,7 @@
         return null;
       }
 
-      const needsPassport = activeInstitution && hasFeature('Custom Domain Support');
-      if (needsPassport && !passportPhotoBase64) {
+      if (!passportPhotoBase64) {
         if (formLanguage === 'sw') {
           alert("Tafadhali pakia picha ya pasipoti (Passport size) ya mwanafunzi.");
         } else {
@@ -2233,6 +2498,17 @@
           alert(formLanguage === 'sw' ? "Tafadhali jaza Namba ya Mtihani wa Kidato cha 4 (CSEE Index No)." : "Please enter the NECTA Exam Index Number.");
           return null;
         }
+        const vocPhone = document.getElementById('form-voc-phone').value.trim();
+        const vocEmail = document.getElementById('form-voc-email').value.trim();
+        const vocProgram = document.getElementById('form-voc-program').value;
+        if (!vocPhone || !vocEmail || !vocProgram) {
+          if (formLanguage === 'sw') {
+            alert("Tafadhali jaza Kozi unayoomba, Simu na Barua Pepe yako.");
+          } else {
+            alert("Please fill out the Program to Pursue, your Phone, and Email.");
+          }
+          return null;
+        }
       }
 
       return {
@@ -2255,6 +2531,9 @@
         kPickup: document.getElementById('form-k-pickup') ? document.getElementById('form-k-pickup').value.trim() || 'N/A' : 'N/A',
         secPrev: document.getElementById('form-sec-prev') ? document.getElementById('form-sec-prev').value.trim() || 'N/A' : 'N/A',
         secYear: document.getElementById('form-sec-year') ? document.getElementById('form-sec-year').value.trim() || 'N/A' : 'N/A',
+        vocProgram: document.getElementById('form-voc-program') ? document.getElementById('form-voc-program').value : 'N/A',
+        vocPhone: document.getElementById('form-voc-phone') ? document.getElementById('form-voc-phone').value.trim() : 'N/A',
+        vocEmail: document.getElementById('form-voc-email') ? document.getElementById('form-voc-email').value.trim() : 'N/A',
         vocAcsee: document.getElementById('form-voc-acsee') ? document.getElementById('form-voc-acsee').value.trim() || 'N/A' : 'N/A',
         vocAward: document.getElementById('form-voc-award') ? document.getElementById('form-voc-award').value : 'N/A',
         vocMode: document.getElementById('form-voc-mode') ? document.getElementById('form-voc-mode').value : 'N/A',
@@ -2310,7 +2589,8 @@
         schoolId: activeInstitution.id,
         formData: formData,
         passportPhoto: passportPhotoBase64,
-        signature: signatureBase64
+        signature: signatureBase64,
+        signatureParent: signatureParentBase64
       };
 
       localStorage.setItem(`elimu_form_draft_${activeInstitution.id}`, JSON.stringify(draft));
@@ -2361,6 +2641,11 @@
         } else {
           clearSignatureCanvasOnly();
         }
+
+        signatureParentBase64 = draft.signatureParent || null;
+        if (signatureParentBase64) {
+          restoreSignaturePadParent(signatureParentBase64);
+        }
       } catch (e) {
         console.error("Error loading form draft:", e);
       }
@@ -2379,15 +2664,22 @@
           preview.classList.add('hidden');
           placeholder.classList.remove('hidden');
         }
+        signatureParentBase64 = null;
         clearSignaturePad();
+        if (signaturePadParent) {
+          clearSignaturePadParent();
+        }
       }
     }
 
 
 
     function downloadFormPdf(type) {
-      const data = getActiveFormData();
-      if (!data) return;
+      let data = null;
+      if (type !== 'joining') {
+        data = getActiveFormData();
+        if (!data) return;
+      }
 
       const primary = activeInstitution.primaryColor || '#059669';
       const rawLogo = activeInstitution.logo || '';
@@ -2408,6 +2700,7 @@
       const hasLogo = hasFeature('Custom Logo & Brand Colors') && rawLogo;
       const pdfPassportPhoto = passportPhotoBase64 || null; // Always show if uploaded
       const pdfSignature = signatureBase64 || null; // Always show if drawn
+      const pdfSignatureParent = signatureParentBase64 || null; // Always show if drawn
 
       checkImageCORS(hasLogo ? rawLogo : '', function(isSafe) {
         const logoSrc = isSafe ? (hasLogo ? rawLogo : '') : '';
@@ -2448,6 +2741,10 @@
           subTitle = "Fomu ya Maombi ya Udahili - Kigamboni Institute of Business & Technology";
           passportText = "Affix Passport<br/>Photograph<br/>Here<br/>(Official Formal)";
         }
+        
+        if (type === 'joining') {
+          levelTitle = isSw ? "MAELEKEZO YA KUJIUNGA / JOINING INSTRUCTIONS" : "JOINING INSTRUCTIONS & REQUIREMENTS";
+        }
 
         // Save current scroll and scroll to top to prevent viewport layout clipping
         const originalScrollY = window.scrollY;
@@ -2487,13 +2784,15 @@
         const tempDiv = document.createElement('div');
         tempDiv.id = 'pdf-render-temp';
         tempDiv.style.position = 'relative';
-        tempDiv.style.width = '795px';
-        tempDiv.style.height = 'auto';
+        tempDiv.style.width = '210mm';
+        tempDiv.style.maxWidth = '210mm';
+        tempDiv.style.minHeight = '297mm';
         tempDiv.style.background = '#ffffff';
         tempDiv.style.color = '#000000';
-        tempDiv.style.padding = '30px';
+        tempDiv.style.padding = '15mm';
         tempDiv.style.boxSizing = 'border-box';
         tempDiv.style.fontFamily = 'Arial, sans-serif';
+        tempDiv.style.overflow = 'hidden';
         tempDiv.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
         tempDiv.style.borderRadius = '8px';
         tempDiv.style.marginTop = '20px';
@@ -2502,38 +2801,51 @@
         if (activeInstitution.letterhead && activeInstitution.letterhead.trim() !== '' && hasFeature('Custom Domain Support')) {
           headerHtml = `
             <img src="${activeInstitution.letterhead}" crossorigin="anonymous" style="width: 100%; height: auto; max-height: 100px; object-fit: contain; margin-bottom: 6px; display: block;" />
-            <table class="pdf-header-table" style="margin-bottom: 4px;">
+            <table class="pdf-header-table" style="margin-bottom: 4px; width: 100%; table-layout: fixed;">
               <tr>
-                <td class="pdf-header-text" style="width: 70%; vertical-align: middle;">
-                  <div class="pdf-form-title" style="font-size: 9px; font-weight: 800; border-bottom: 1.5px solid ${primary}; padding-bottom: 2px; display: inline-block;">${levelTitle}</div>
+                <!-- Left spacer for balancing -->
+                <td style="width: 35mm; text-align: left; vertical-align: middle;"></td>
+                
+                <td class="pdf-header-text" style="vertical-align: middle; text-align: center;">
+                  <div class="pdf-form-title" style="margin: 0 auto; display: inline-block; background-color: ${primary}; color: white; padding: 3px 15px; font-size: 9px; font-weight: 800; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.5px;">${levelTitle}</div>
                 </td>
-                <td style="width: 30%; vertical-align: top;">
-                  <div class="pdf-passport-box" style="margin-top: 0; margin-bottom: 0; height: 95px; width: 85px;">
-                    ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" />` : passportText}
+                
+                <td style="width: 35mm; vertical-align: top; text-align: right;">
+                  ${type !== 'joining' ? `
+                  <div class="pdf-passport-box" style="margin-top: 0; margin-bottom: 0; margin-left: auto; margin-right: 0;">
+                    ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" />` : `<span style="font-size: 7px; text-align: center; padding: 0 2px; text-transform: uppercase; font-weight: bold; color: #94a3b8;">Affix Passport Photo (2x2 / 35x45mm)</span>`}
                   </div>
+                  ` : ''}
                 </td>
               </tr>
             </table>
           `;
         } else {
           headerHtml = `
-            <table class="pdf-header-table">
+            <table class="pdf-header-table" style="width: 100%; table-layout: fixed;">
               <tr>
-                <td class="pdf-header-text" style="width: 70%;">
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    ${logoSrc ? `<img src="${logoSrc}" crossorigin="anonymous" style="width: 48px; height: 48px; border-radius: 6px; object-fit: cover;" />` : `<div style="width: 48px; height: 48px; border-radius: 6px; background: ${primary}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 850; font-size: 18px;">${initials}</div>`}
-                    <div>
-                      <div class="pdf-header-flag">${headerFlag}</div>
-                      <h2 class="pdf-school-title">${activeInstitution.name}</h2>
-                      <p class="pdf-school-meta">Reg No: ${activeInstitution.regNo || 'N/A'} &bull; S.L.P / P.O. Box: ${activeInstitution.poBox || 'N/A'}, ${activeInstitution.region || 'Tanzania'} &bull; Email: ${activeInstitution.email} &bull; Simu: +${activeInstitution.phone}</p>
-                      <div class="pdf-form-title">${levelTitle}</div>
-                    </div>
+                <!-- Left Cell: Logo -->
+                <td style="width: 35mm; vertical-align: middle; text-align: left;">
+                  ${logoSrc ? `<img src="${logoSrc}" crossorigin="anonymous" style="width: 60px; height: 60px; border-radius: 6px; object-fit: contain;" />` : `<div style="width: 60px; height: 60px; border-radius: 6px; background: ${primary}; color: white; display: flex; align-items: center; justify-content: center; font-weight: 850; font-size: 20px;">${initials}</div>`}
+                </td>
+                
+                <!-- Center Cell: Centered School details -->
+                <td class="pdf-header-text" style="text-align: center; vertical-align: middle;">
+                  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;">
+                    <div class="pdf-header-flag" style="margin: 0 auto 2px auto; display: inline-block;">${headerFlag}</div>
+                    <h2 class="pdf-school-title" style="margin: 0 auto; text-align: center; font-size: 13px; font-weight: 850; color: ${primary}; text-transform: uppercase;">${activeInstitution.name}</h2>
+                    <p class="pdf-school-meta" style="margin: 2px auto; text-align: center; font-size: 7.5px; color: #334155;">Reg No: ${activeInstitution.regNo || 'N/A'} &bull; S.L.P / P.O. Box: ${activeInstitution.poBox || 'N/A'}, ${activeInstitution.region || 'Tanzania'} &bull; Email: ${activeInstitution.email} &bull; Simu: +${activeInstitution.phone}</p>
+                    <div class="pdf-form-title" style="margin: 4px auto 0 auto; display: inline-block; background-color: ${primary}; color: white; padding: 3px 15px; font-size: 9px; font-weight: 800; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.5px;">${levelTitle}</div>
                   </div>
                 </td>
-                <td style="width: 30%; vertical-align: top;">
-                  <div class="pdf-passport-box">
-                    ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" />` : passportText}
+                
+                <!-- Right Cell: Passport Box -->
+                <td style="width: 35mm; vertical-align: top; text-align: right;">
+                  ${type !== 'joining' ? `
+                  <div class="pdf-passport-box" style="margin-left: auto; margin-right: 0;">
+                    ${pdfPassportPhoto ? `<img src="${pdfPassportPhoto}" class="pdf-passport-img" />` : `<span style="font-size: 7px; text-align: center; padding: 0 2px; text-transform: uppercase; font-weight: bold; color: #94a3b8;">Affix Passport Photo (2x2 / 35x45mm)</span>`}
                   </div>
+                  ` : ''}
                 </td>
               </tr>
             </table>
@@ -2543,6 +2855,14 @@
         // Styling sheets for formal Tanzanian form layout
         let contentHtml = `
           <style>
+            @page {
+              size: A4 portrait;
+              margin: 0;
+            }
+            @media print {
+              body { margin: 0; padding: 0; }
+              .pdf-container { width: 210mm; min-height: 297mm; padding: 15mm; }
+            }
             .pdf-container {
               font-family: Arial, sans-serif;
               color: #0f172a;
@@ -2587,10 +2907,13 @@
               text-transform: uppercase;
               margin: 2px 0 0 0;
             }
-            .pdf-passport-box {
-              width: 95px;
-              height: 110px;
-              border: 1.5px dashed #475569;
+             .pdf-passport-box {
+              width: 30mm;
+              height: 38mm;
+              min-width: 30mm;
+              min-height: 38mm;
+              border: 1px solid #94a3b8;
+              border-radius: 2px;
               display: flex;
               flex-direction: column;
               align-items: center;
@@ -2599,16 +2922,18 @@
               font-size: 7px;
               font-weight: bold;
               color: #64748b;
-              background: #f8fafc;
+              background: #f1f5f9;
               box-sizing: border-box;
               margin: 0 0 0 auto;
               overflow: hidden;
+              flex-shrink: 0;
+              padding: 0.5mm;
             }
             .pdf-passport-img {
               width: 100%;
               height: 100%;
               object-fit: contain;
-              background-color: #f8fafc;
+              object-position: center;
               display: block;
             }
             .pdf-meta-bar {
@@ -3272,15 +3597,15 @@
                 <tr>
                   <td>
                     <div class="pdf-field-title">Mobile Phone No</div>
-                    <div class="pdf-field-value">+255 7XX XXX XXX</div>
+                    <div class="pdf-field-value">${data.vocPhone}</div>
                   </td>
                   <td>
                     <div class="pdf-field-title">WhatsApp Number</div>
-                    <div class="pdf-field-value">+255 7XX XXX XXX</div>
+                    <div class="pdf-field-value">${data.vocPhone}</div>
                   </td>
                   <td>
                     <div class="pdf-field-title">Applicant Email Address</div>
-                    <div class="pdf-field-value">admissions@kibt.ac.tz</div>
+                    <div class="pdf-field-value">${data.vocEmail}</div>
                   </td>
                 </tr>
               </table>
@@ -3291,7 +3616,7 @@
                 <tr>
                   <td style="width: 40%;">
                     <div class="pdf-field-title">Programme Name</div>
-                    <div class="pdf-field-value">${data.classLevel}</div>
+                    <div class="pdf-field-value">${data.vocProgram}</div>
                   </td>
                   <td style="width: 30%;">
                     <div class="pdf-field-title">Award Level</div>
@@ -3382,13 +3707,15 @@
               <table class="pdf-signature-table">
                 <tr>
                   <td style="width: 45%; border-top: 1.2px solid #94a3b8; text-align: center; padding-top: 5px; font-weight: bold; color: #475569;">
-                    <div style="height: 32px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;"></div>
+                    <div style="height: 32px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;">
+                      ${pdfSignature ? `<img src="${pdfSignature}" style="max-height: 32px; max-width: 150px; object-fit: contain;" />` : ''}
+                    </div>
                     Applicant Signature &bull; Date: ______/______/2026
                   </td>
                   <td style="width: 10%;"></td>
                   <td style="width: 45%; border-top: 1.2px solid #94a3b8; text-align: center; padding-top: 5px; font-weight: bold; color: #475569;">
                     <div style="height: 32px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;">
-                      ${pdfSignature ? `<img src="${pdfSignature}" style="max-height: 32px; max-width: 150px; object-fit: contain;" />` : ''}
+                      ${pdfSignatureParent ? `<img src="${pdfSignatureParent}" style="max-height: 32px; max-width: 150px; object-fit: contain;" />` : ''}
                     </div>
                     Sponsor / Guardian Signature &bull; Date: ______/______/2026
                   </td>
@@ -3504,7 +3831,7 @@
           // Extra buffer to let browser paint
           setTimeout(() => {
             const opt = {
-              margin:       10,
+              margin:       0,
               filename:     `${activeInstitution.name.replace(/\s+/g, '_')}_Registration.pdf`,
               image:        { type: 'jpeg', quality: 0.98 },
               html2canvas:  { 
@@ -3514,10 +3841,17 @@
                 scrollX: 0,
                 scrollY: 0,
                 onclone: (clonedDoc) => {
+                  clonedDoc.body.style.margin = '0';
+                  clonedDoc.body.style.padding = '0';
                   const el = clonedDoc.getElementById('pdf-render-temp') || 
                              clonedDoc.querySelector('#pdf-render-temp') || 
                              clonedDoc.querySelector('.pdf-container')?.parentElement;
                   if (el) {
+                    el.style.position = 'absolute';
+                    el.style.left = '0';
+                    el.style.top = '0';
+                    el.style.margin = '0';
+                    el.style.padding = '15mm';
                     el.style.zIndex = '99999';
                     el.style.visibility = 'visible';
                     el.style.display = 'block';
@@ -4416,6 +4750,7 @@
       const region = document.getElementById('cms-region').value.trim();
       const regNo = document.getElementById('cms-reg-no').value.trim();
       const poBox = document.getElementById('cms-po-box').value.trim();
+      const programs = document.getElementById('cms-programs').value.trim();
       const phone = document.getElementById('cms-phone').value.trim();
       const email = document.getElementById('cms-email').value.trim();
       const image = document.getElementById('cms-image').value.trim();
@@ -4492,6 +4827,7 @@
             region,
             regNo,
             poBox,
+            programs,
             phone,
             email,
             image,
@@ -4517,6 +4853,7 @@
           region,
           regNo,
           poBox,
+          programs,
           phone,
           email,
           image,
@@ -4550,6 +4887,7 @@
       document.getElementById('cms-region').value = inst.region;
       document.getElementById('cms-reg-no').value = inst.regNo || '';
       document.getElementById('cms-po-box').value = inst.poBox || '';
+      document.getElementById('cms-programs').value = inst.programs || '';
       document.getElementById('cms-phone').value = inst.phone;
       document.getElementById('cms-email').value = inst.email;
       document.getElementById('cms-image').value = inst.image || '';

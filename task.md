@@ -33,3 +33,11 @@
 - [x] Add Registration Number and P.O. Box fields inside the CMS institution builder form, rendering them dynamically inside the PDF header when no letterhead banner is configured
 - [x] Resolve signature drawing pad canvas sizing conflict by reordering layout visibility sequences before initSignaturePad execution
 - [x] Apply object-fit: contain to frontend and A4 PDF passport photo slots to ensure uploaded images render fully without cropping
+- [x] Fix signature draft recovery scaling logic by temporarily resetting context transform variables, and prevent duplicate event bindings
+- [x] Convert passport size photo validation to code-level JS checks to prevent empty file inputs from blocking draft submissions
+- [x] Add Courses/Programs Offered configuration textarea inside the CMS school creation form, saving values to KV siteState
+- [x] Add dynamic Program to Pursue selector, Applicant's Phone input, and Applicant's Email input inside the vocational/college level form fields
+- [x] Dynamically populate the Program selector from the comma-separated programs list configured inside the CMS per institution
+- [x] Update downloadFormPdf to map vocational student's phone, email, and selected program, and route digital signatures to the Applicant signature box
+- [x] Squeeze the passport photo preview box directly next to the upload input within the student particulars grid row to make the form layout highly compact
+- [x] Support dual digital signature pads (one for Applicant and one for Parent/Guardian/Sponsor) inside the frontend form for vocational/college students, saving both to drafts and mapping both to the A4 PDF document
