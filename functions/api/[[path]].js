@@ -1,146 +1,87 @@
-// Serverless catch-all api routing for Cloudflare Pages Functions
-export async function onRequest(context) {
-  const { request, env } = context;
+// Cloudflare Pages Function: Universal Catch-All API Router
+function getKv(e) {
+  if (!e) return null;
+  if (e.MY_KV_NAMESPACE && typeof e.MY_KV_NAMESPACE.get === 'function') return e.MY_KV_NAMESPACE;
+  if (e.SCHOOLS_KV && typeof e.SCHOOLS_KV.get === 'function') return e.SCHOOLS_KV;
+  if (e.ELIMU_DB && typeof e.ELIMU_DB.get === 'function') return e.ELIMU_DB;
+  if (e.ELIMU_KV && typeof e.ELIMU_KV.get === 'function') return e.ELIMU_KV;
+  if (e.ELIMU_DATA && typeof e.ELIMU_DATA.get === 'function') return e.ELIMU_DATA;
+  if (e.KV_NAMESPACE && typeof e.KV_NAMESPACE.get === 'function') return e.KV_NAMESPACE;
+  if (e.DB && typeof e.DB.get === 'function') return e.DB;
+  if (e.KV && typeof e.KV.get === 'function') return e.KV;
+  for (const key of Object.keys(e)) {
+    if (e[key] && typeof e[key].get === 'function' && typeof e[key].put === 'function') {
+      return e[key];
+    }
+  }
+  return null;
+}
+
+function getR2(e) {
+  if (!e) return null;
+  if (e.R2_BUCKET && typeof e.R2_BUCKET.put === 'function') return e.R2_BUCKET;
+  if (e.MY_BUCKET && typeof e.MY_BUCKET.put === 'function') return e.MY_BUCKET;
+  if (e.ELIMU_BUCKET && typeof e.ELIMU_BUCKET.put === 'function') return e.ELIMU_BUCKET;
+  if (e.BUCKET && typeof e.BUCKET.put === 'function') return e.BUCKET;
+  if (e.MEDIA_BUCKET && typeof e.MEDIA_BUCKET.put === 'function') return e.MEDIA_BUCKET;
+  if (e.DOCS_BUCKET && typeof e.DOCS_BUCKET.put === 'function') return e.DOCS_BUCKET;
+  if (e.UPLOADS_BUCKET && typeof e.UPLOADS_BUCKET.put === 'function') return e.UPLOADS_BUCKET;
+  if (e.FILES_BUCKET && typeof e.FILES_BUCKET.put === 'function') return e.FILES_BUCKET;
+  for (const key of Object.keys(e)) {
+    if (e[key] && typeof e[key].put === 'function' && typeof e[key].get === 'function') {
+      return e[key];
+    }
+  }
+  return null;
+}
+
+export async function onRequest({ request, env, params }) {
   const url = new URL(request.url);
   const path = url.pathname;
   const method = request.method;
 
-  // Setup headers for CORS and JSON output
   const headers = new Headers({
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, DELETE',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Filename',
   });
 
-  // Handle Options preflight
   if (method === 'OPTIONS') {
     return new Response(null, { headers, status: 204 });
   }
 
-  // Check if KV is bound
-  const isDbBound = env && env.ELIMU_DB;
+  const kv = getKv(env);
+  const r2 = getR2(env);
+  const isDbBound = !!kv;
+  const isR2Bound = !!r2;
 
-  // Simple hardcoded fallback password. 
-  // Real apps would store hashed passwords in KV.
-  const DEFAULT_PASSWORD = "Admin@Elimu2026";
-
-  try {
-    // 1. Authentication verify endpoint
-    if (path === '/api/auth' && method === 'POST') {
-      const body = await request.json();
-      const password = body.password;
-
-      // Check if password has been configured in KV, else default
-      let correctPassword = DEFAULT_PASSWORD;
-      if (isDbBound) {
-        const storedPwd = await env.ELIMU_DB.get('admin_password');
-        if (storedPwd) correctPassword = storedPwd;
+  // R2 File Streaming fallback
+  if (path.startsWith('/api/files/')) {
+    const key = decodeURIComponent(path.replace(/^\/api\/files\//, ''));
+    if (isR2Bound && key) {
+      const object = await r2.get(key);
+      if (!object) {
+        return new Response(JSON.stringify({ success: false, error: 'File not found in R2 storage' }), { headers, status: 404 });
       }
-
-      if (password === correctPassword) {
-        // Return a mock JWT/Token
-        const token = btoa(JSON.stringify({ user: 'admin', exp: Date.now() + 24 * 60 * 60 * 1000 }));
-        return new Response(JSON.stringify({ success: true, token }), { headers, status: 200 });
-      } else {
-        return new Response(JSON.stringify({ success: false, error: 'Incorrect Password' }), { headers, status: 401 });
+      const fileHeaders = new Headers();
+      object.writeHttpMetadata(fileHeaders);
+      fileHeaders.set('etag', object.httpEtag);
+      fileHeaders.set('Access-Control-Allow-Origin', '*');
+      fileHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
+      if (!fileHeaders.get('Content-Type')) {
+        fileHeaders.set('Content-Type', key.endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
       }
+      return new Response(object.body, { headers: fileHeaders, status: 200 });
     }
-
-    // Change Admin password endpoint
-    if (path === '/api/auth-change' && method === 'POST') {
-      // Basic Authorization Check
-      const authHeader = request.headers.get('Authorization') || '';
-      if (!authHeader.startsWith('Bearer ')) {
-        return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), { headers, status: 401 });
-      }
-
-      const body = await request.json();
-      const newPassword = body.newPassword;
-      if (!newPassword || newPassword.length < 4) {
-        return new Response(JSON.stringify({ success: false, error: 'Password too short' }), { headers, status: 400 });
-      }
-
-      if (isDbBound) {
-        await env.ELIMU_DB.put('admin_password', newPassword);
-        return new Response(JSON.stringify({ success: true }), { headers, status: 200 });
-      } else {
-        return new Response(JSON.stringify({ success: false, error: 'Database not bound' }), { headers, status: 400 });
-      }
-    }
-
-    // 2. Institutions endpoint
-    if (path === '/api/institutions') {
-      if (method === 'GET') {
-        let list = null;
-        if (isDbBound) {
-          const raw = await env.ELIMU_DB.get('institutions_list');
-          if (raw) {
-            list = JSON.parse(raw);
-          }
-        }
-        return new Response(JSON.stringify({ 
-          success: true, 
-          dbMode: isDbBound ? 'cloudflare_kv' : 'local_storage',
-          data: list
-        }), { headers, status: 200 });
-      }
-
-      if (method === 'POST') {
-        // Authorization check
-        const authHeader = request.headers.get('Authorization') || '';
-        if (!authHeader.startsWith('Bearer ')) {
-          return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), { headers, status: 401 });
-        }
-
-        const body = await request.json();
-        if (isDbBound) {
-          await env.ELIMU_DB.put('institutions_list', JSON.stringify(body.data));
-          return new Response(JSON.stringify({ success: true }), { headers, status: 200 });
-        } else {
-          return new Response(JSON.stringify({ success: false, error: 'Database not bound' }), { headers, status: 400 });
-        }
-      }
-    }
-
-    // 3. Pricing packages endpoint
-    if (path === '/api/pricing') {
-      if (method === 'GET') {
-        let pricing = null;
-        if (isDbBound) {
-          const raw = await env.ELIMU_DB.get('pricing_packages');
-          if (raw) {
-            pricing = JSON.parse(raw);
-          }
-        }
-        return new Response(JSON.stringify({ 
-          success: true, 
-          dbMode: isDbBound ? 'cloudflare_kv' : 'local_storage',
-          data: pricing
-        }), { headers, status: 200 });
-      }
-
-      if (method === 'POST') {
-        // Authorization check
-        const authHeader = request.headers.get('Authorization') || '';
-        if (!authHeader.startsWith('Bearer ')) {
-          return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), { headers, status: 401 });
-        }
-
-        const body = await request.json();
-        if (isDbBound) {
-          await env.ELIMU_DB.put('pricing_packages', JSON.stringify(body.data));
-          return new Response(JSON.stringify({ success: true }), { headers, status: 200 });
-        } else {
-          return new Response(JSON.stringify({ success: false, error: 'Database not bound' }), { headers, status: 400 });
-        }
-      }
-    }
-
-    // Endpoint not found
-    return new Response(JSON.stringify({ success: false, error: `Not found: ${path}` }), { headers, status: 404 });
-
-  } catch (err) {
-    return new Response(JSON.stringify({ success: false, error: err.message }), { headers, status: 500 });
+    return new Response(JSON.stringify({ success: false, error: 'R2 storage not bound' }), { headers, status: 404 });
   }
+
+  return new Response(JSON.stringify({
+    success: true,
+    route: path,
+    isDbBound: isDbBound,
+    isR2Bound: isR2Bound,
+    timestamp: new Date().toISOString()
+  }), { headers, status: 200 });
 }
