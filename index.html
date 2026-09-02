@@ -38,13 +38,53 @@
         }
       }
     }
+  <script>
+    // Synchronous pre-paint route detector to prevent any layout flash on refresh/load
+    (function() {
+      try {
+        const hash = window.location.hash || '#/';
+        const clean = hash.replace(/^#\/?/, '').split('?')[0].toLowerCase();
+        const parts = clean.split('/').filter(Boolean);
+        const known = ['home', 'about', 'forms', 'pricing', 'contact', 'cms'];
+        let initialPage = 'home';
+        if (parts.length > 0) {
+          if (known.includes(parts[0])) {
+            initialPage = parts[0];
+          } else {
+            initialPage = 'forms';
+          }
+        }
+        document.documentElement.setAttribute('data-initial-route', initialPage);
+      } catch(e) {}
+    })();
   </script>
   <style>
-    .page-section { display: none; }
-    .page-section.active { display: block; animation: fadeIn 0.2s ease-in-out; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
+    html {
+      scroll-behavior: smooth;
+    }
+    .page-section { 
+      display: none; 
+    }
+    .page-section.active { 
+      display: block; 
+      animation: pageSmoothFade 0.12s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    /* Pre-paint instantaneous display for the refreshed route before JS execution */
+    html[data-initial-route="home"] #page-home,
+    html[data-initial-route="about"] #page-about,
+    html[data-initial-route="forms"] #page-forms,
+    html[data-initial-route="pricing"] #page-pricing,
+    html[data-initial-route="contact"] #page-contact,
+    html[data-initial-route="cms"] #page-cms {
+      display: block;
+    }
+    @keyframes pageSmoothFade {
+      0% { opacity: 0.92; }
+      100% { opacity: 1; }
+    }
+    .nav-btn, .mobile-nav-btn {
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      will-change: background-color, color;
     }
   </style>
 </head>
@@ -68,15 +108,15 @@
 
          <!-- Desktop Navigation Menu -->
         <nav class="hidden md:flex items-center space-x-1">
-          <button onclick="navigateTo('home')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-colors text-brand-700 bg-brand-50" data-page="home">Home</button>
-          <button onclick="navigateTo('about')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-page="about">About Us</button>
-          <button onclick="navigateTo('forms')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-page="forms">School Forms</button>
-          <button onclick="navigateTo('pricing')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-page="pricing">Pricing</button>
-          <button onclick="navigateTo('contact')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-page="contact">Contacts</button>
+          <button onclick="navigateTo('home')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-brand-700 bg-brand-50" data-page="home">Home</button>
+          <button onclick="navigateTo('about')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-page="about">About Us</button>
+          <button onclick="navigateTo('forms')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-page="forms">School Forms</button>
+          <button onclick="navigateTo('pricing')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-page="pricing">Pricing</button>
+          <button onclick="navigateTo('contact')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-page="contact">Contacts</button>
           <button id="global-lang-btn" onclick="toggleGlobalLanguage()" class="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 text-slate-700 hover:bg-slate-100 transition flex items-center gap-1 focus:outline-none ml-2 mr-1">
             🌐 English
           </button>
-          <button onclick="navigateTo('cms')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-1.5" data-page="cms">
+          <button onclick="navigateTo('cms')" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-1.5" data-page="cms">
             <i data-lucide="log-in" class="w-3.5 h-3.5"></i> Login
           </button>
           <button onclick="navigateTo('forms')" class="ml-3 px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-medium rounded-lg shadow-sm transition flex items-center gap-2">
@@ -109,10 +149,10 @@
     </div>
   </header>
 
-  <main class="flex-grow">
+  <main class="flex-grow min-h-[calc(100vh-140px)]">
 
     <!-- ================= 1. PAGE: HOME ================= -->
-    <section id="page-home" class="page-section active">
+    <section id="page-home" class="page-section">
       <!-- Hero with African Education Photography -->
       <div class="relative bg-slate-950 text-white overflow-hidden">
         <img src="assets/media_1787912951199.jpg" alt="Tanzanian students in classroom learning" class="absolute inset-0 w-full h-full object-cover opacity-30" />
@@ -327,6 +367,10 @@
                     <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Religion / Denomination" data-sw="Dini / Dhehebu">Religion / Denomination</span></label>
                     <input type="text" id="form-religion" placeholder="e.g. Christian, Muslim" data-placeholder-en="e.g. Christian, Muslim" data-placeholder-sw="Mfano: Mkristo, Muislamu" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
                   </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="RITA Birth Certificate No" data-sw="Namba ya Cheti cha Kuzaliwa (RITA)">RITA Birth Certificate No</span></label>
+                    <input type="text" id="form-rita-no" placeholder="e.g. 123456/A or RITA/2026/01" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                  </div>
                   <div id="form-class-container">
                     <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Applying Level/Class *" data-sw="Darasa / Kidato / Kozi ya Maombi *">Applying Level/Class *</span></label>
                     <select id="form-class" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none"></select>
@@ -367,18 +411,35 @@
                   </div>
                 </div>
 
+                <!-- Academic Background (Universal to all forms) -->
+                <div class="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                  <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                    <span class="lang-txt" data-en="Academic Background & Previous Schooling" data-sw="Taarifa za Shule Uliyotoka & Darasa/Kidato cha Mwisho">Academic Background & Previous Schooling</span>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Previous School Attended" data-sw="Shule Uliyotoka / Uliyosoma">Previous School Attended</span></label>
+                      <input type="text" id="form-prev-school" placeholder="e.g. Mlimani Primary / Tuangoma Nursery" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Last Class / Form / Level Completed" data-sw="Darasa / Kidato cha Mwisho">Last Class / Form / Level Completed</span></label>
+                      <input type="text" id="form-prev-class" placeholder="e.g. Std 7, Form 4, Baby Class 3, Level 2" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Completion / Transfer Year" data-sw="Mwaka wa Kuhitimu / Kuhama">Completion / Transfer Year</span></label>
+                      <input type="number" id="form-prev-year" placeholder="e.g. 2025" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Level-Specific Containers (Tanzanian Standards) -->
                 <div class="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-4">
                   <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                    <span class="lang-txt" data-en="TZ Standard Level Specific Details" data-sw="Vigezo Maalum kwa Ngazi ya Elimu Tanzania">TZ Standard Level Specific Details</span>
+                    <span class="lang-txt" data-en="Level-Specific Options & Requirements" data-sw="Vigezo Maalum kwa Ngazi ya Elimu">Level-Specific Options & Requirements</span>
                   </div>
                   
                   <!-- Kindergarten fields -->
                   <div id="fields-kindergarten" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="RITA Birth Certificate No *" data-sw="Namba ya Cheti cha Kuzaliwa (RITA) *">RITA Birth Certificate No *</span></label>
-                      <input type="text" id="form-k-rita" placeholder="e.g. 123456/A" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
-                    </div>
                     <div>
                       <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Immunization Card Status (Chanjo) *" data-sw="Hali ya Kadi ya Chanjo *">Immunization Card Status (Chanjo) *</span></label>
                       <select id="form-k-vaccine" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
@@ -397,22 +458,15 @@
                       <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="School Bus Pickup Point / Station" data-sw="Kituo cha Kupandia Gari la Shule">School Bus Pickup Point / Station</span></label>
                       <input type="text" id="form-k-bus-station" placeholder="e.g. Kisutu, Kigamboni Corner" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
                     </div>
-                    <div class="sm:col-span-2">
+                    <div>
                       <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Authorized Pickup Person (Full Name) *" data-sw="Mtu Aliyeidhinishwa Kumchukua Mtoto (Jina Kamili) *">Authorized Pickup Person (Full Name) *</span></label>
                       <input type="text" id="form-k-pickup" placeholder="e.g. Asha Hamisi (Mama mdogo)" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
                     </div>
                   </div>
 
                   <!-- Primary fields -->
-                  <div id="fields-primary" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="RITA Birth Certificate No *" data-sw="Namba ya Cheti cha Kuzaliwa (RITA) *">RITA Birth Certificate No *</span></label>
-                      <input type="text" id="form-p-rita" placeholder="e.g. 123456/A" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
-                    </div>
-                    <div>
-                      <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Previous School / Daycare Attended" data-sw="Shule ya Awali/Daycare Aliyosoma">Previous School / Daycare Attended</span></label>
-                      <input type="text" id="form-p-nursery" placeholder="e.g. Little Angels Daycare" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
-                    </div>
+                  <div id="fields-primary" class="hidden text-xs text-slate-500 italic">
+                    <span class="lang-txt" data-en="Standard primary school admission particulars configured." data-sw="Taarifa za msingi zimekamilika.">Standard primary school admission particulars configured.</span>
                   </div>
 
                   <!-- Secondary fields -->
@@ -431,14 +485,6 @@
                     <div>
                       <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="High School Combination (if A-Level)" data-sw="Tahasusi / Combination (Kama ni Kidato cha 5/6)">High School Combination (if A-Level)</span></label>
                       <input type="text" id="form-sec-comb" placeholder="e.g. PCM, PCB, HGL" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
-                    </div>
-                    <div>
-                      <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Previous School Attended *" data-sw="Shule Aliyotoka *">Previous School Attended *</span></label>
-                      <input type="text" id="form-sec-prev" placeholder="e.g. Tuangoma Primary" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
-                    </div>
-                    <div>
-                      <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Graduation/Completion Year *" data-sw="Mwaka wa Kuhitimu *">Graduation/Completion Year *</span></label>
-                      <input type="number" id="form-sec-year" placeholder="e.g. 2025" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
                     </div>
                   </div>
 
@@ -499,7 +545,7 @@
                 <h4 class="text-sm font-bold text-slate-900 border-b pb-2 mb-4 flex items-center gap-2 text-brand-800" id="header-parent-particulars">
                   <i data-lucide="users" class="w-4 h-4"></i> <span class="lang-txt" data-en="2. Parent / Guardian / Sponsor Particulars" data-sw="2. Taarifa za Mzazi / Mlezi / Mfadhili">2. Parent / Guardian / Sponsor Particulars</span>
                 </h4>
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
                   <div>
                     <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Parent / Guardian Name *" data-sw="Jina la Mzazi / Mlezi *">Parent / Guardian Name *</span></label>
                     <input type="text" id="form-parent-name" required class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
@@ -516,6 +562,10 @@
                       <option value="Mfadhili (Sponsor)">Mfadhili (Sponsor)</option>
                       <option value="Self (Mwanafunzi)">Self (Mwanafunzi)</option>
                     </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Parent Occupation *" data-sw="Kazi / Shughuli ya Mzazi *">Parent Occupation *</span></label>
+                    <input type="text" id="form-parent-occupation" placeholder="e.g. Mfanyabiashara / Teacher" class="mt-1 w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none" />
                   </div>
                   <div>
                     <label class="block text-xs font-semibold text-slate-700"><span class="lang-txt" data-en="Parent NIDA / Voter Card No" data-sw="Namba ya NIDA / Kura ya Mzazi">Parent NIDA / Voter Card No</span></label>
@@ -1619,12 +1669,23 @@
       customContentSections = siteState.customContents;
 
       applyPublicContents();
-      renderSchools();
       renderCmsTable();
       populateCmsPackageOptions();
-      renderPricingPackages();
       renderPricingCmsTable();
       renderCustomContentBlocks();
+
+      const targetRoute = document.documentElement.getAttribute('data-initial-route') || 'home';
+      const curSection = document.querySelector('.page-section.active');
+      const activePage = curSection ? curSection.id.replace('page-', '') : targetRoute;
+
+      if (activePage === 'forms' || !hasRenderedSchools) {
+        renderSchools();
+        hasRenderedSchools = true;
+      }
+      if (activePage === 'pricing' || !hasRenderedPricing) {
+        renderPricingPackages();
+        hasRenderedPricing = true;
+      }
       if (activeInstitution) {
         openFormForSchool(activeInstitution.id, false);
       }
@@ -1713,24 +1774,46 @@
     }
 
     let currentCategory = 'all';
+    let hasRenderedSchools = false;
+    let hasRenderedPricing = false;
 
     // --- 2. Navigation Routing ---
     function navigateTo(pageId, updateHistory = true) {
-      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-      const activeSection = document.getElementById(`page-${pageId}`);
-      if (activeSection) {
-        activeSection.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      const targetSection = document.getElementById(`page-${pageId}`);
+      if (!targetSection) return;
+
+      const currentActive = document.querySelector('.page-section.active');
+      if (currentActive === targetSection) {
+        if (window.scrollY > 50) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        return;
       }
 
+      // Hide all other sections and show target smoothly
+      document.querySelectorAll('.page-section').forEach(sec => {
+        if (sec !== targetSection) {
+          sec.classList.remove('active');
+        }
+      });
+      targetSection.classList.add('active');
+
+      // Scroll immediately to top to avoid visual lag
+      window.scrollTo(0, 0);
+
+      // Update URL hash quietly without triggering redundant hashchange cycles
       if (updateHistory) {
         try {
-          window.location.hash = pageId === 'home' ? '#/' : '#/' + pageId;
+          const newHash = pageId === 'home' ? '#/' : '#/' + pageId;
+          if (window.location.hash !== newHash) {
+            history.pushState(null, '', newHash);
+          }
         } catch (e) {
           console.warn("hash routing failed:", e);
         }
       }
 
+      // Smoothly update nav buttons
       document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
         const isCurrent = btn.getAttribute('data-page') === pageId;
         if (btn.classList.contains('mobile-nav-btn')) {
@@ -1740,24 +1823,37 @@
         } else {
           if (btn.getAttribute('data-page') === 'cms') {
             btn.className = isCurrent 
-              ? 'nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition-colors text-amber-900 bg-amber-200 flex items-center gap-1.5'
-              : 'nav-btn px-3 py-2 rounded-lg text-sm font-semibold transition-colors text-amber-700 bg-amber-50 hover:bg-amber-100 flex items-center gap-1.5';
+              ? 'nav-btn px-3 py-2 rounded-lg text-sm font-semibold text-amber-900 bg-amber-200 flex items-center gap-1.5'
+              : 'nav-btn px-3 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-1.5';
           } else {
             btn.className = isCurrent 
-              ? 'nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-colors text-brand-700 bg-brand-50'
-              : 'nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100';
+              ? 'nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-brand-700 bg-brand-50'
+              : 'nav-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100';
           }
         }
       });
 
       const mobileMenu = document.getElementById('mobile-menu');
-      if (!mobileMenu.classList.contains('hidden')) {
+      if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
         mobileMenu.classList.add('hidden');
       }
 
-      if (pageId === 'forms') renderSchools();
+      // Smart DOM cache: avoid tearing down and rebuilding DOM if already populated
+      if (pageId === 'forms') {
+        const dir = document.getElementById('schools-directory');
+        if (!hasRenderedSchools || !dir || dir.children.length === 0) {
+          renderSchools();
+          hasRenderedSchools = true;
+        }
+      }
+      if (pageId === 'pricing') {
+        const grid = document.getElementById('pricing-packages-grid');
+        if (!hasRenderedPricing || !grid || grid.children.length === 0) {
+          renderPricingPackages();
+          hasRenderedPricing = true;
+        }
+      }
       if (pageId === 'cms') checkCmsAuth();
-      if (pageId === 'pricing') renderPricingPackages();
     }
 
     function openCategoryTab(category) {
@@ -1875,7 +1971,10 @@
 
       if (updateHistory) {
         try {
-          window.location.hash = '#/forms/' + (inst.slug || inst.id);
+          const newHash = '#/forms/' + (inst.slug || inst.id);
+          if (window.location.hash !== newHash) {
+            history.pushState(null, '', newHash);
+          }
         } catch (e) {
           console.warn("hash routing failed:", e);
         }
@@ -2154,12 +2253,8 @@
       document.getElementById('active-form-wrapper').classList.add('hidden');
       const url = new URL(window.location);
       url.searchParams.delete('tab');
-      window.history.replaceState({}, '', url);
-      try {
-        window.location.hash = '#/forms';
-      } catch (e) {
-        console.warn("hash routing failed:", e);
-      }
+      url.hash = '#/forms';
+      window.history.pushState({}, '', url);
     }
 
     function switchFormTab(tab) {
@@ -2556,11 +2651,11 @@
       const parentPhone = document.getElementById('form-parent-phone').value.trim();
       const formClass = document.getElementById('form-class').value.trim();
 
-      if (!first || !last || !parentName || !parentPhone || !formClass) {
+      if (!first || !last || !parentName || !parentPhone || (!formClass && activeInstitution.category !== 'vocational')) {
         if (formLanguage === 'sw') {
-          alert("Tafadhali jaza taarifa zote muhimu (Jina, Darasa, Mzazi na Simu ya WhatsApp).");
+          alert("Tafadhali jaza taarifa zote muhimu (Jina, Darasa/Kozi, Mzazi na Simu ya WhatsApp).");
         } else {
-          alert("Please fill out all required fields (Name, Class, Parent Name and WhatsApp Phone).");
+          alert("Please fill out all required fields (Name, Class/Program, Parent Name and WhatsApp Phone).");
         }
         return null;
       }
@@ -2576,33 +2671,17 @@
 
       // Level-Specific ID Validation (Tanzania Standards)
       let idNum = 'N/A';
-      if (activeInstitution.category === 'kindergarten') {
-        idNum = document.getElementById('form-k-rita').value.trim();
-        if (!idNum) {
-          alert(formLanguage === 'sw' ? "Tafadhali jaza Namba ya Cheti cha Kuzaliwa cha RITA." : "Please enter the RITA Birth Certificate Number.");
-          return null;
-        }
-      } else if (activeInstitution.category === 'primary') {
-        idNum = document.getElementById('form-p-rita').value.trim();
-        if (!idNum) {
-          alert(formLanguage === 'sw' ? "Tafadhali jaza Namba ya Cheti cha Kuzaliwa cha RITA." : "Please enter the RITA Birth Certificate Number.");
-          return null;
-        }
+      const universalRita = document.getElementById('form-rita-no') ? document.getElementById('form-rita-no').value.trim() : '';
+      
+      if (activeInstitution.category === 'kindergarten' || activeInstitution.category === 'primary') {
+        idNum = universalRita || 'N/A';
       } else if (activeInstitution.category === 'secondary') {
-        idNum = document.getElementById('form-sec-necta').value.trim();
-        if (!idNum) {
-          alert(formLanguage === 'sw' ? "Tafadhali jaza Namba ya Mtihani wa NECTA (PSLE/CSEE Index No)." : "Please enter the NECTA Exam Index Number.");
-          return null;
-        }
+        idNum = document.getElementById('form-sec-necta') ? document.getElementById('form-sec-necta').value.trim() : 'N/A';
       } else if (activeInstitution.category === 'vocational') {
-        idNum = document.getElementById('form-voc-necta').value.trim();
-        if (!idNum) {
-          alert(formLanguage === 'sw' ? "Tafadhali jaza Namba ya Mtihani wa Kidato cha 4 (CSEE Index No)." : "Please enter the NECTA Exam Index Number.");
-          return null;
-        }
-        const vocPhone = document.getElementById('form-voc-phone').value.trim();
-        const vocEmail = document.getElementById('form-voc-email').value.trim();
-        const vocProgram = document.getElementById('form-voc-program').value;
+        idNum = document.getElementById('form-voc-necta') ? document.getElementById('form-voc-necta').value.trim() : 'N/A';
+        const vocPhone = document.getElementById('form-voc-phone') ? document.getElementById('form-voc-phone').value.trim() : '';
+        const vocEmail = document.getElementById('form-voc-email') ? document.getElementById('form-voc-email').value.trim() : '';
+        const vocProgram = document.getElementById('form-voc-program') ? document.getElementById('form-voc-program').value : '';
         if (!vocPhone || !vocEmail || !vocProgram) {
           if (formLanguage === 'sw') {
             alert("Tafadhali jaza Kozi unayoomba, Simu na Barua Pepe yako.");
@@ -2618,12 +2697,17 @@
         studentName: `${first} ${document.getElementById('form-middle').value.trim()} ${last}`.replace(/\s+/g, ' '),
         dob: document.getElementById('form-dob').value,
         gender: document.getElementById('form-gender').value,
-        classLevel: formClass,
+        classLevel: formClass || 'N/A',
         idNum: idNum,
+        ritaNo: universalRita || 'N/A',
         location: document.getElementById('form-location').value || 'N/A',
+        prevSchool: document.getElementById('form-prev-school') ? document.getElementById('form-prev-school').value.trim() || 'N/A' : 'N/A',
+        prevClass: document.getElementById('form-prev-class') ? document.getElementById('form-prev-class').value.trim() || 'N/A' : 'N/A',
+        prevYear: document.getElementById('form-prev-year') ? document.getElementById('form-prev-year').value.trim() || 'N/A' : 'N/A',
         parentName: parentName,
         parentPhone: parentPhone,
         parentRel: document.getElementById('form-parent-rel').value,
+        parentOccupation: document.getElementById('form-parent-occupation') ? document.getElementById('form-parent-occupation').value.trim() || 'N/A' : 'N/A',
         parentNida: document.getElementById('form-parent-nida').value.trim() || 'N/A',
         healthBlood: document.getElementById('form-health-blood').value,
         healthDisability: document.getElementById('form-health-disability').value,
@@ -2631,11 +2715,13 @@
         kBus: document.getElementById('form-k-bus') ? document.getElementById('form-k-bus').value : 'N/A',
         kBusStation: document.getElementById('form-k-bus-station') ? document.getElementById('form-k-bus-station').value.trim() || 'N/A' : 'N/A',
         kPickup: document.getElementById('form-k-pickup') ? document.getElementById('form-k-pickup').value.trim() || 'N/A' : 'N/A',
-        secPrev: document.getElementById('form-sec-prev') ? document.getElementById('form-sec-prev').value.trim() || 'N/A' : 'N/A',
-        secYear: document.getElementById('form-sec-year') ? document.getElementById('form-sec-year').value.trim() || 'N/A' : 'N/A',
+        secBoarding: document.getElementById('form-sec-boarding') ? document.getElementById('form-sec-boarding').value : 'N/A',
+        secComb: document.getElementById('form-sec-comb') ? document.getElementById('form-sec-comb').value.trim() || 'N/A' : 'N/A',
+        secNecta: document.getElementById('form-sec-necta') ? document.getElementById('form-sec-necta').value.trim() || 'N/A' : 'N/A',
         vocProgram: document.getElementById('form-voc-program') ? document.getElementById('form-voc-program').value : 'N/A',
         vocPhone: document.getElementById('form-voc-phone') ? document.getElementById('form-voc-phone').value.trim() : 'N/A',
         vocEmail: document.getElementById('form-voc-email') ? document.getElementById('form-voc-email').value.trim() : 'N/A',
+        vocNecta: document.getElementById('form-voc-necta') ? document.getElementById('form-voc-necta').value.trim() || 'N/A' : 'N/A',
         vocAcsee: document.getElementById('form-voc-acsee') ? document.getElementById('form-voc-acsee').value.trim() || 'N/A' : 'N/A',
         vocAward: document.getElementById('form-voc-award') ? document.getElementById('form-voc-award').value : 'N/A',
         vocMode: document.getElementById('form-voc-mode') ? document.getElementById('form-voc-mode').value : 'N/A',
@@ -3156,14 +3242,15 @@
         `;
 
         if (type === 'registration' || type === 'combined') {
+          const locParts = (data.location || '').split(',');
+          const regVal = locParts[0] ? locParts[0].trim() : 'N/A';
+          const distVal = locParts[1] ? locParts[1].trim() : 'N/A';
+          const wardVal = locParts[2] ? locParts[2].trim() : 'N/A';
+          const mtaaVal = locParts[3] ? locParts[3].trim() : (locParts[2] ? locParts[2].trim() : 'N/A');
+          const signDate = new Date().toLocaleDateString('en-GB');
+
           // Dynamic elements based on level
           if (activeInstitution.category === 'kindergarten') {
-            const locParts = (data.location || '').split(',');
-            const regVal = locParts[0] ? locParts[0].trim() : 'N/A';
-            const distVal = locParts[1] ? locParts[1].trim() : 'N/A';
-            const wardVal = locParts[2] ? locParts[2].trim() : 'N/A';
-            const mtaaVal = locParts[3] ? locParts[3].trim() : (locParts[2] ? locParts[2].trim() : 'N/A');
-
             contentHtml += `
               <!-- Academic Info Bar -->
               <table style="width: 100%; margin-bottom: 6px; font-size: 8px;" class="pdf-meta-bar">
@@ -3205,7 +3292,7 @@
                   </td>
                   <td>
                     <div class="pdf-field-title">Namba ya Cheti cha RITA (Birth Cert No)</div>
-                    <div class="pdf-field-value">${data.idNum}</div>
+                    <div class="pdf-field-value">${data.ritaNo || data.idNum}</div>
                   </td>
                 </tr>
                 <tr>
@@ -3228,28 +3315,16 @@
               <div class="pdf-section-title">2. MAKAZI NA USAFIRI / RESIDENCE & SCHOOL BUS LOGISTICS</div>
               <table class="pdf-grid-table">
                 <tr>
-                  <td style="width: 25%;">
-                    <div class="pdf-field-title">Mkoa (Region)</div>
-                    <div class="pdf-field-value">${regVal}</div>
-                  </td>
-                  <td style="width: 25%;">
-                    <div class="pdf-field-title">Wilaya (District)</div>
-                    <div class="pdf-field-value">${distVal}</div>
-                  </td>
-                  <td style="width: 25%;">
-                    <div class="pdf-field-title">Kata (Ward)</div>
-                    <div class="pdf-field-value">${wardVal}</div>
-                  </td>
-                  <td style="width: 25%;">
-                    <div class="pdf-field-title">Mtaa / Kijiji</div>
-                    <div class="pdf-field-value">${mtaaVal}</div>
-                  </td>
+                  <td style="width: 25%;"><div class="pdf-field-title">Mkoa (Region)</div><div class="pdf-field-value">${regVal}</div></td>
+                  <td style="width: 25%;"><div class="pdf-field-title">Wilaya (District)</div><div class="pdf-field-value">${distVal}</div></td>
+                  <td style="width: 25%;"><div class="pdf-field-title">Kata (Ward)</div><div class="pdf-field-value">${wardVal}</div></td>
+                  <td style="width: 25%;"><div class="pdf-field-title">Mtaa / Kijiji (Street/Village)</div><div class="pdf-field-value">${mtaaVal}</div></td>
                 </tr>
                 <tr>
                   <td colspan="2">
                     <div class="pdf-field-title">Mtumiaji wa Usafiri wa Shule? (School Bus Service)</div>
                     <div class="pdf-field-value" style="font-size: 7.5px;">
-                      [ ${data.kBus && (data.kBus.includes('Ndio') || data.kBus.includes('Yes')) ? 'X' : ' '} ] Ndiyo (Yes) - Kituo cha Kupandia: <u>${data.kBusStation || '________________'}</u> &nbsp;&nbsp;&nbsp;&nbsp;
+                      [ ${data.kBus && (data.kBus.includes('Ndio') || data.kBus.includes('Yes')) ? 'X' : ' '} ] Ndiyo (Yes) - Kituo: <u>${data.kBusStation || '________________'}</u> &nbsp;&nbsp;&nbsp;&nbsp;
                       [ ${!data.kBus || (!data.kBus.includes('Ndio') && !data.kBus.includes('Yes')) ? 'X' : ' '} ] Hapana (Self Transport)
                     </div>
                   </td>
@@ -3287,49 +3362,37 @@
                     <div class="pdf-field-value">${data.parentPhone}</div>
                   </td>
                   <td>
-                    <div class="pdf-field-title">Barua Pepe (Email)</div>
-                    <div class="pdf-field-value">${data.parentPhone ? (data.parentPhone.substring(0, 4) === '2557' ? 'info@school.ac.tz' : 'admissions@school.ac.tz') : 'N/A'}</div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="pdf-field-title">Mtu wa Dharura (Emergency Contact)</div>
-                    <div class="pdf-field-value">${data.parentName}</div>
-                  </td>
-                  <td>
-                    <div class="pdf-field-title">Simu ya Dharura</div>
-                    <div class="pdf-field-value">${data.parentPhone}</div>
-                  </td>
-                  <td>
-                    <div class="pdf-field-title">Kazi / Ofisi ya Mzazi</div>
-                    <div class="pdf-field-value">Self Employed / Officer</div>
+                    <div class="pdf-field-title">Kazi / Shughuli ya Mzazi (Occupation)</div>
+                    <div class="pdf-field-value">${data.parentOccupation}</div>
                   </td>
                 </tr>
               </table>
 
-              <!-- Section 4: Health & Immunization -->
-              <div class="pdf-section-title">4. AFYA, CHANJO & MAZINGIRA MAALUM / HEALTH & IMMUNIZATION</div>
+              <!-- Section 4: Academic History & Health -->
+              <div class="pdf-section-title">4. HISTORIA YA MASOMO & AFYA / ACADEMIC & HEALTH BACKGROUND</div>
               <table class="pdf-grid-table">
                 <tr>
                   <td style="width: 40%;">
-                    <div class="pdf-field-title">Kadi ya Kliniki / Chanjo Kamili?</div>
-                    <div class="pdf-field-value" style="font-size: 7.5px;">
-                      [ ${data.kBus ? 'X' : ' '} ] Ndiyo (Fully Vaccinated) &nbsp;&nbsp;&nbsp;&nbsp; [ ${!data.kBus ? 'X' : ' '} ] Bado
-                    </div>
+                    <div class="pdf-field-title">Shule ya Awali / Daycare Aliyosoma</div>
+                    <div class="pdf-field-value">${data.prevSchool}</div>
                   </td>
-                  <td style="width: 25%;">
-                    <div class="pdf-field-title">Kundi la Damu (Blood Group)</div>
-                    <div class="pdf-field-value">${data.healthBlood}</div>
+                  <td style="width: 30%;">
+                    <div class="pdf-field-title">Darasa / Ngazi ya Mwisho</div>
+                    <div class="pdf-field-value">${data.prevClass}</div>
                   </td>
-                  <td style="width: 35%;">
-                    <div class="pdf-field-title">Mzio wa Vyakula/Dawa (Allergies)</div>
-                    <div class="pdf-field-value">${data.healthAllergies}</div>
+                  <td style="width: 30%;">
+                    <div class="pdf-field-title">Mwaka wa Kuhitimu / Kuhama</div>
+                    <div class="pdf-field-value">${data.prevYear}</div>
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="3">
-                    <div class="pdf-field-title">Maelekezo Maalum ya Kiafya / Mwenendo wa Mtoto (Special Dietary/Behavioral Notes)</div>
-                    <div class="pdf-field-value">${data.healthDisability}</div>
+                  <td>
+                    <div class="pdf-field-title">Kundi la Damu (Blood Group)</div>
+                    <div class="pdf-field-value">${data.healthBlood}</div>
+                  </td>
+                  <td colspan="2">
+                    <div class="pdf-field-title">Mzio wa Vyakula / Dawa & Changamoto za Afya</div>
+                    <div class="pdf-field-value">${data.healthAllergies} &bull; Disability: ${data.healthDisability}</div>
                   </td>
                 </tr>
               </table>
@@ -3350,12 +3413,6 @@
               </div>
             `;
           } else if (activeInstitution.category === 'primary') {
-            const locParts = (data.location || '').split(',');
-            const regVal = locParts[0] ? locParts[0].trim() : 'N/A';
-            const distVal = locParts[1] ? locParts[1].trim() : 'N/A';
-            const wardVal = locParts[2] ? locParts[2].trim() : 'N/A';
-            const mtaaVal = locParts[3] ? locParts[3].trim() : (locParts[2] ? locParts[2].trim() : 'N/A');
-
             contentHtml += `
               <!-- Academic Info Bar -->
               <table style="width: 100%; margin-bottom: 6px; font-size: 8px;" class="pdf-meta-bar">
@@ -3394,7 +3451,7 @@
                   </td>
                   <td>
                     <div class="pdf-field-title">Namba ya Cheti cha RITA / Birth Cert No</div>
-                    <div class="pdf-field-value">${data.idNum}</div>
+                    <div class="pdf-field-value">${data.ritaNo || data.idNum}</div>
                   </td>
                 </tr>
                 <tr>
@@ -3407,8 +3464,8 @@
                     <div class="pdf-field-value">${religion}</div>
                   </td>
                   <td>
-                    <div class="pdf-field-title">Shule ya Awali / Msingi Aliyotoka</div>
-                    <div class="pdf-field-value">${document.getElementById('form-p-nursery').value || 'N/A'}</div>
+                    <div class="pdf-field-title">Lugha Kuu Nyumbani (Primary Language)</div>
+                    <div class="pdf-field-value">Kiswahili / English</div>
                   </td>
                 </tr>
               </table>
@@ -3420,7 +3477,7 @@
                   <td style="width: 25%;"><div class="pdf-field-title">Mkoa (Region)</div><div class="pdf-field-value">${regVal}</div></td>
                   <td style="width: 25%;"><div class="pdf-field-title">Wilaya (District)</div><div class="pdf-field-value">${distVal}</div></td>
                   <td style="width: 25%;"><div class="pdf-field-title">Kata (Ward)</div><div class="pdf-field-value">${wardVal}</div></td>
-                  <td style="width: 25%;"><div class="pdf-field-title">Mtaa / Kijiji</div><div class="pdf-field-value">${mtaaVal}</div></td>
+                  <td style="width: 25%;"><div class="pdf-field-title">Mtaa / Kijiji (Street/Village)</div><div class="pdf-field-value">${mtaaVal}</div></td>
                 </tr>
               </table>
 
@@ -3432,11 +3489,11 @@
                     <div class="pdf-field-title">Jina Kamili la Mzazi Mkuu / Parent Name</div>
                     <div class="pdf-field-value">${data.parentName}</div>
                   </td>
-                  <td style="width: 25%;">
+                  <td style="width: 30%;">
                     <div class="pdf-field-title">Uhusiano / Relationship</div>
                     <div class="pdf-field-value">${data.parentRel}</div>
                   </td>
-                  <td style="width: 35%;">
+                  <td style="width: 30%;">
                     <div class="pdf-field-title">Namba ya NIDA / Kitambulisho</div>
                     <div class="pdf-field-value">${data.parentNida}</div>
                   </td>
@@ -3452,26 +3509,36 @@
                   </td>
                   <td>
                     <div class="pdf-field-title">Kazi / Shughuli ya Mzazi (Occupation)</div>
-                    <div class="pdf-field-value">Business / Employed</div>
+                    <div class="pdf-field-value">${data.parentOccupation}</div>
                   </td>
                 </tr>
               </table>
 
-              <!-- Section 4: Health Information -->
-              <div class="pdf-section-title">4. TAARIFA ZA AFYA & MAHITAJI MAALUM (HEALTH INFORMATION)</div>
+              <!-- Section 4: Academic History & Health -->
+              <div class="pdf-section-title">4. HISTORIA YA MASOMO & AFYA / ACADEMIC & HEALTH BACKGROUND</div>
               <table class="pdf-grid-table">
                 <tr>
+                  <td style="width: 40%;">
+                    <div class="pdf-field-title">Shule Uliyotoka (Previous School)</div>
+                    <div class="pdf-field-value">${data.prevSchool}</div>
+                  </td>
                   <td style="width: 30%;">
+                    <div class="pdf-field-title">Darasa la Mwisho Ulichosoma</div>
+                    <div class="pdf-field-value">${data.prevClass}</div>
+                  </td>
+                  <td style="width: 30%;">
+                    <div class="pdf-field-title">Mwaka wa Kuhitimu / Kuhama</div>
+                    <div class="pdf-field-value">${data.prevYear}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
                     <div class="pdf-field-title">Kundi la Damu / Blood Group</div>
                     <div class="pdf-field-value">${data.healthBlood}</div>
                   </td>
-                  <td style="width: 30%;">
-                    <div class="pdf-field-title">Ulemavu / Changamoto ya Viungo</div>
-                    <div class="pdf-field-value">${data.healthDisability}</div>
-                  </td>
-                  <td style="width: 40%;">
-                    <div class="pdf-field-title">Mzio wa Chakula / Dawa (Allergy)</div>
-                    <div class="pdf-field-value">${data.healthAllergies}</div>
+                  <td colspan="2">
+                    <div class="pdf-field-title">Mzio wa Chakula / Dawa & Mahitaji Maalum</div>
+                    <div class="pdf-field-value">${data.healthAllergies} &bull; Disability: ${data.healthDisability}</div>
                   </td>
                 </tr>
               </table>
@@ -3492,12 +3559,6 @@
               </div>
             `;
           } else if (activeInstitution.category === 'secondary') {
-            const locParts = (data.location || '').split(',');
-            const regVal = locParts[0] ? locParts[0].trim() : 'N/A';
-            const distVal = locParts[1] ? locParts[1].trim() : 'N/A';
-            const wardVal = locParts[2] ? locParts[2].trim() : 'N/A';
-            const mtaaVal = locParts[3] ? locParts[3].trim() : (locParts[2] ? locParts[2].trim() : 'N/A');
-
             contentHtml += `
               <!-- Academic Info Bar -->
               <table style="width: 100%; margin-bottom: 6px; font-size: 8px;" class="pdf-meta-bar">
@@ -3539,7 +3600,7 @@
                   </td>
                   <td>
                     <div class="pdf-field-title">Namba ya Cheti cha Kuzaliwa (RITA)</div>
-                    <div class="pdf-field-value">RITA/2026/______</div>
+                    <div class="pdf-field-value">${data.ritaNo}</div>
                   </td>
                 </tr>
                 <tr>
@@ -3553,7 +3614,7 @@
                   </td>
                   <td>
                     <div class="pdf-field-title">Namba ya Mtihani wa NECTA (PSLE / CSEE)</div>
-                    <div class="pdf-field-value">${data.idNum}</div>
+                    <div class="pdf-field-value">${data.idNum || data.secNecta}</div>
                   </td>
                 </tr>
               </table>
@@ -3601,27 +3662,8 @@
                     <div class="pdf-field-value">${data.parentPhone}</div>
                   </td>
                   <td>
-                    <div class="pdf-field-title">Kazi / Shughuli (Occupation)</div>
-                    <div class="pdf-field-value">Public / Private Employed</div>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="3" style="background-color: #f1f5f9; font-weight: bold; font-size: 7.5px; padding: 2px;">
-                    Mtu wa Dharura / Mlezi wa Pili (Emergency Contact / Secondary Guardian)
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="pdf-field-title">Jina Kamili</div>
-                    <div class="pdf-field-value">${data.parentName}</div>
-                  </td>
-                  <td>
-                    <div class="pdf-field-title">Uhusiano</div>
-                    <div class="pdf-field-value">Mlezi Msaidizi</div>
-                  </td>
-                  <td>
-                    <div class="pdf-field-title">Namba ya Simu ya Dharura</div>
-                    <div class="pdf-field-value">${data.parentPhone}</div>
+                    <div class="pdf-field-title">Kazi / Shughuli ya Mzazi (Occupation)</div>
+                    <div class="pdf-field-value">${data.parentOccupation}</div>
                   </td>
                 </tr>
               </table>
@@ -3632,15 +3674,15 @@
                 <tr>
                   <td style="width: 40%;">
                     <div class="pdf-field-title">Shule Uliyotoka (Previous School Attended)</div>
-                    <div class="pdf-field-value">${data.secPrev}</div>
+                    <div class="pdf-field-value">${data.prevSchool}</div>
                   </td>
                   <td style="width: 30%;">
                     <div class="pdf-field-title">Darasa / Kidato cha Mwisho</div>
-                    <div class="pdf-field-value">Std 7 / Form 4</div>
+                    <div class="pdf-field-value">${data.prevClass}</div>
                   </td>
                   <td style="width: 30%;">
                     <div class="pdf-field-title">Mwaka wa Kuhitimu / Kuhama</div>
-                    <div class="pdf-field-value">${data.secYear}</div>
+                    <div class="pdf-field-value">${data.prevYear}</div>
                   </td>
                 </tr>
                 <tr>
@@ -3681,7 +3723,7 @@
                 <tr>
                   <td>Academic Year: <strong>2026</strong></td>
                   <td>Intake: <strong>March / September Intake</strong></td>
-                  <td>NACTVET AVN No: <strong>${data.idNum}</strong></td>
+                  <td>NACTVET AVN / Exam No: <strong>${data.idNum}</strong></td>
                 </tr>
               </table>
 
@@ -3712,8 +3754,8 @@
                     <div class="pdf-field-value">${data.gender}</div>
                   </td>
                   <td>
-                    <div class="pdf-field-title">National Identification (NIDA No)</div>
-                    <div class="pdf-field-value">${data.vocNida || '20XXXXXXXXXXXXXX'}</div>
+                    <div class="pdf-field-title">Namba ya Cheti cha RITA / Birth Cert No</div>
+                    <div class="pdf-field-value">${data.ritaNo}</div>
                   </td>
                 </tr>
                 <tr>
@@ -3752,48 +3794,44 @@
                 <tr>
                   <td>
                     <div class="pdf-field-title">CSEE (Form 4) Index No</div>
-                    <div class="pdf-field-value">${document.getElementById('form-voc-necta').value}</div>
+                    <div class="pdf-field-value">${data.vocNecta || 'N/A'}</div>
                   </td>
                   <td>
-                    <div class="pdf-field-title">ACSEE (Form 6) Index No</div>
-                    <div class="pdf-field-value">${data.vocAcsee}</div>
+                    <div class="pdf-field-title">Shule / Chuo Ulichotoka</div>
+                    <div class="pdf-field-value">${data.prevSchool} (${data.prevClass})</div>
                   </td>
                   <td>
-                    <div class="pdf-field-title">Completion Year</div>
-                    <div class="pdf-field-value">2025</div>
+                    <div class="pdf-field-title">Mwaka / Year</div>
+                    <div class="pdf-field-value">${data.prevYear}</div>
                   </td>
                 </tr>
               </table>
 
-              <!-- Section 3: Sponsor & Guardian Details -->
-              <div class="pdf-section-title">3. SPONSOR, PARENT OR GUARDIAN DETAILS / MDHAMINI</div>
+              <!-- Section 3: Residential Location & Sponsor/Guardian Details -->
+              <div class="pdf-section-title">3. MAKAZI NA TAARIFA ZA MDHAMINI / RESIDENTIAL & SPONSOR DETAILS</div>
               <table class="pdf-grid-table">
                 <tr>
-                  <td style="width: 40%;">
-                    <div class="pdf-field-title">Sponsor / Guardian Full Name</div>
-                    <div class="pdf-field-value">${data.parentName}</div>
-                  </td>
-                  <td style="width: 25%;">
-                    <div class="pdf-field-title">Relationship</div>
-                    <div class="pdf-field-value">${data.parentRel}</div>
-                  </td>
-                  <td style="width: 35%;">
-                    <div class="pdf-field-title">Sponsor Phone Number</div>
-                    <div class="pdf-field-value">${data.parentPhone}</div>
-                  </td>
+                  <td style="width: 25%;"><div class="pdf-field-title">Mkoa (Region)</div><div class="pdf-field-value">${regVal}</div></td>
+                  <td style="width: 25%;"><div class="pdf-field-title">Wilaya (District)</div><div class="pdf-field-value">${distVal}</div></td>
+                  <td style="width: 25%;"><div class="pdf-field-title">Kata (Ward)</div><div class="pdf-field-value">${wardVal}</div></td>
+                  <td style="width: 25%;"><div class="pdf-field-title">Mtaa / Kijiji (Street/Village)</div><div class="pdf-field-value">${mtaaVal}</div></td>
                 </tr>
                 <tr>
                   <td>
-                    <div class="pdf-field-title">Permanent Residential Address</div>
-                    <div class="pdf-field-value">${data.location}</div>
+                    <div class="pdf-field-title">Sponsor / Guardian Full Name</div>
+                    <div class="pdf-field-value">${data.parentName}</div>
                   </td>
                   <td>
-                    <div class="pdf-field-title">Region & District</div>
-                    <div class="pdf-field-value">${activeInstitution.region}</div>
+                    <div class="pdf-field-title">Relationship</div>
+                    <div class="pdf-field-value">${data.parentRel}</div>
                   </td>
                   <td>
-                    <div class="pdf-field-title">Sponsor Email Address</div>
-                    <div class="pdf-field-value">${data.vocSponsor || 'sponsor@elimu.go.tz'}</div>
+                    <div class="pdf-field-title">Sponsor Phone Number</div>
+                    <div class="pdf-field-value">${data.parentPhone}</div>
+                  </td>
+                  <td>
+                    <div class="pdf-field-title">Sponsor Occupation</div>
+                    <div class="pdf-field-value">${data.parentOccupation}</div>
                   </td>
                 </tr>
               </table>
@@ -3823,7 +3861,7 @@
             </div>
           `;
 
-          // Section 7: Signatures Table
+          // Section 7: Signatures Table with Auto Current Date
           if (activeInstitution.category === 'vocational') {
             contentHtml += `
               <table class="pdf-signature-table">
@@ -3832,14 +3870,14 @@
                     <div style="height: 32px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;">
                       ${pdfSignature ? `<img src="${pdfSignature}" style="max-height: 32px; max-width: 150px; object-fit: contain;" />` : ''}
                     </div>
-                    Applicant Signature &bull; Date: ______/______/2026
+                    Applicant Signature &bull; Date: ${signDate}
                   </td>
                   <td style="width: 10%;"></td>
                   <td style="width: 45%; border-top: 1.2px solid #94a3b8; text-align: center; padding-top: 5px; font-weight: bold; color: #475569;">
                     <div style="height: 32px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;">
                       ${pdfSignatureParent ? `<img src="${pdfSignatureParent}" style="max-height: 32px; max-width: 150px; object-fit: contain;" />` : ''}
                     </div>
-                    Sponsor / Guardian Signature &bull; Date: ______/______/2026
+                    Sponsor / Guardian Signature &bull; Date: ${signDate}
                   </td>
                 </tr>
               </table>
@@ -3852,12 +3890,12 @@
                     <div style="height: 32px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;">
                       ${pdfSignature ? `<img src="${pdfSignature}" style="max-height: 32px; max-width: 150px; object-fit: contain;" />` : ''}
                     </div>
-                    Sahihi ya Mzazi / Mlezi (Parent Signature) &bull; Tarehe: ______/______/2026
+                    Sahihi ya Mzazi / Mlezi &bull; Tarehe: ${signDate}
                   </td>
                   <td style="width: 10%;"></td>
                   <td style="width: 45%; border-top: 1.2px solid #94a3b8; text-align: center; padding-top: 5px; font-weight: bold; color: #475569;">
                     <div style="height: 32px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;"></div>
-                    Mwalimu Mkuu (Headmaster / Principal Signature) &bull; Tarehe: ______/______/2026
+                    Mwalimu Mkuu (Headmaster) &bull; Tarehe: ${signDate}
                   </td>
                 </tr>
               </table>
@@ -3884,14 +3922,14 @@
                 <div class="pdf-official-title">KWA MATUMIZI YA OFISI YA SHULE TU (FOR OFFICIAL SCHOOL USE ONLY)</div>
                 <table style="width: 100%; border-collapse: collapse; font-size: 7.5px;">
                   <tr>
-                    <td style="padding: 2.5px; font-weight: bold; color: #334155; width: 33.3%;">Hali ya Usajili (Status): [ &nbsp; ] Amepokelewa &nbsp;&nbsp; [ &nbsp; ] Hajapokelewa</td>
-                    <td style="padding: 2.5px; font-weight: bold; color: #334155; width: 33.3%;">Namba ya Mwanafunzi (Admission No): _________________</td>
-                    <td style="padding: 2.5px; font-weight: bold; color: #334155; width: 33.3%;">Kidato / Mkondo (Class/Stream): _________________</td>
+                    <td style="padding: 2.5px; font-weight: bold; color: #334155; width: 33.3%;">Hali ya Usajili: [ &nbsp; ] Amepokelewa &nbsp;&nbsp; [ &nbsp; ] Hajapokelewa</td>
+                    <td style="padding: 2.5px; font-weight: bold; color: #334155; width: 33.3%;">Namba ya Mwanafunzi: _________________</td>
+                    <td style="padding: 2.5px; font-weight: bold; color: #334155; width: 33.3%;">Kidato / Mkondo: _________________</td>
                   </tr>
                   <tr>
-                    <td style="padding: 2.5px; font-weight: bold; color: #334155;">Jina la Mkuu wa Shule / Afisa Usajili: _________________</td>
+                    <td style="padding: 2.5px; font-weight: bold; color: #334155;">Jina la Mkuu wa Shule: _________________</td>
                     <td style="padding: 2.5px; font-weight: bold; color: #334155;">Sahihi & Muhuri wa Shule: _________________</td>
-                    <td style="padding: 2.5px; font-weight: bold; color: #334155;">Tarehe: ______/______/20___</td>
+                    <td style="padding: 2.5px; font-weight: bold; color: #334155;">Tarehe: ${signDate}</td>
                   </tr>
                 </table>
               </div>
@@ -3917,12 +3955,46 @@
             .replace(/\n/g, '<br/>');
 
           contentHtml += `
-            <div style="${type === 'combined' ? 'page-break-before: always; break-before: page; margin-top: 15px;' : 'margin-top: 15px;'}">
-              <h2 style="font-size: 13px; font-weight: bold; color: ${primary}; border-bottom: 2px solid ${primary}; padding-bottom: 4px; margin-bottom: 10px; text-transform: uppercase; text-align: left;">
-                ${t.joiningTitle}
-              </h2>
-              <div style="font-size: 10px; line-height: 1.6; color: #1e293b; background: #fdfdfd; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; white-space: pre-wrap; text-align: left;">
+            <div class="pdf-joining-page" style="${type === 'combined' ? 'page-break-before: always; break-before: page; margin-top: 25px; padding-top: 10px;' : 'margin-top: 10px;'}">
+              ${type === 'combined' ? `
+                <div style="border-bottom: 2px solid ${primary}; padding-bottom: 6px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                  <div>
+                    <h2 style="font-size: 12px; font-weight: 850; color: ${primary}; text-transform: uppercase; margin: 0;">${activeInstitution.name}</h2>
+                    <div style="font-size: 7.5px; color: #475569; margin-top: 2px;">Reg No: ${activeInstitution.regNo || 'N/A'} &bull; S.L.P / P.O. Box: ${activeInstitution.poBox || 'N/A'}, ${activeInstitution.region || 'Tanzania'} &bull; Email: ${activeInstitution.email} &bull; Tel: +${activeInstitution.phone}</div>
+                  </div>
+                  <div style="background-color: ${primary}; color: white; padding: 3px 10px; font-size: 8px; font-weight: bold; border-radius: 3px; text-transform: uppercase;">
+                    ${t.joiningTitle}
+                  </div>
+                </div>
+              ` : `
+                <h2 style="font-size: 12px; font-weight: bold; color: ${primary}; border-bottom: 2px solid ${primary}; padding-bottom: 4px; margin-bottom: 10px; text-transform: uppercase; text-align: left;">
+                  ${t.joiningTitle}
+                </h2>
+              `}
+              
+              <div style="font-size: 9px; line-height: 1.6; color: #1e293b; background: #ffffff; border: 1.2px solid #cbd5e1; padding: 14px; border-radius: 4px; text-align: left;">
                 ${formattedJoining}
+              </div>
+
+              <!-- Official Stamp & Sign-off Box at bottom of joining instructions -->
+              <div style="margin-top: 14px; border: 1.2px dashed ${primary}80; background-color: ${primary}03; padding: 8px 12px; border-radius: 4px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 7.5px;">
+                  <tr>
+                    <td style="width: 50%; vertical-align: top;">
+                      <div style="font-weight: bold; color: ${primary};">OFISI YA MKUU WA TAASISI / PRINCIPAL'S OFFICE</div>
+                      <div style="font-size: 7px; color: #64748b; margin-top: 2px;">Tafadhali zingatia maelekezo yote na kuwasilisha vifaa na viambatanisho siku ya kuripoti.</div>
+                    </td>
+                    <td style="width: 25%; text-align: center; vertical-align: bottom;">
+                      <div style="border-bottom: 1px solid #94a3b8; width: 80%; margin: 0 auto 2px auto;"></div>
+                      <div style="font-size: 7px; color: #64748b;">Sahihi ya Mkuu wa Shule</div>
+                    </td>
+                    <td style="width: 25%; text-align: center; vertical-align: bottom;">
+                      <div style="border: 1px dashed #94a3b8; width: 65px; height: 32px; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #94a3b8;">
+                        Muhuri Rasmi
+                      </div>
+                    </td>
+                  </tr>
+                </table>
               </div>
             </div>
           `;
@@ -4021,20 +4093,20 @@
       let specDetailsText = '';
       if (activeInstitution.category === 'kindergarten') {
         specDetailsText = (formLanguage === 'sw')
-          ? `• Cheti cha RITA: ${data.idNum}\n• Kadi ya Chanjo: ${document.getElementById('form-k-vaccine').value}`
-          : `• RITA Birth Cert: ${data.idNum}\n• Immunization Status: ${document.getElementById('form-k-vaccine').value}`;
+          ? `• Cheti cha RITA: ${data.ritaNo}\n• Shule Uliyotoka: ${data.prevSchool} (${data.prevClass})\n• Kadi ya Chanjo: ${document.getElementById('form-k-vaccine').value}`
+          : `• RITA Birth Cert: ${data.ritaNo}\n• Previous School: ${data.prevSchool} (${data.prevClass})\n• Immunization Status: ${document.getElementById('form-k-vaccine').value}`;
       } else if (activeInstitution.category === 'primary') {
         specDetailsText = (formLanguage === 'sw')
-          ? `• Cheti cha RITA: ${data.idNum}\n• Shule ya Awali: ${document.getElementById('form-p-nursery').value || 'N/A'}`
-          : `• RITA Birth Cert: ${data.idNum}\n• Previous Nursery: ${document.getElementById('form-p-nursery').value || 'N/A'}`;
+          ? `• Cheti cha RITA: ${data.ritaNo}\n• Shule Uliyotoka: ${data.prevSchool} (${data.prevClass})`
+          : `• RITA Birth Cert: ${data.ritaNo}\n• Previous School: ${data.prevSchool} (${data.prevClass})`;
       } else if (activeInstitution.category === 'secondary') {
         specDetailsText = (formLanguage === 'sw')
-          ? `• Namba ya NECTA: ${data.idNum}\n• Hali ya Bweni: ${document.getElementById('form-sec-boarding').value}\n• Combination: ${document.getElementById('form-sec-comb').value || 'N/A'}`
-          : `• NECTA Index No: ${data.idNum}\n• Attendance Mode: ${document.getElementById('form-sec-boarding').value}\n• Combination: ${document.getElementById('form-sec-comb').value || 'N/A'}`;
+          ? `• Cheti cha RITA: ${data.ritaNo}\n• Namba ya NECTA: ${data.idNum}\n• Shule Uliyotoka: ${data.prevSchool} (${data.prevClass})\n• Hali ya Bweni: ${document.getElementById('form-sec-boarding').value}`
+          : `• RITA Birth Cert: ${data.ritaNo}\n• NECTA Index No: ${data.idNum}\n• Previous School: ${data.prevSchool} (${data.prevClass})\n• Attendance Mode: ${document.getElementById('form-sec-boarding').value}`;
       } else if (activeInstitution.category === 'vocational') {
         specDetailsText = (formLanguage === 'sw')
-          ? `• Namba ya Mtihani: ${data.idNum}\n• NIDA: ${document.getElementById('form-voc-nida').value || 'N/A'}\n• Mfadhili: ${document.getElementById('form-voc-sponsor').value || 'N/A'}`
-          : `• Previous Exam Index: ${data.idNum}\n• Student NIDA: ${document.getElementById('form-voc-nida').value || 'N/A'}\n• Sponsor: ${document.getElementById('form-voc-sponsor').value || 'N/A'}`;
+          ? `• Cheti cha RITA: ${data.ritaNo}\n• Namba ya Mtihani (CSEE): ${data.vocNecta}\n• Shule/Chuo Ulichotoka: ${data.prevSchool} (${data.prevClass})\n• NIDA: ${data.vocNida}`
+          : `• RITA Birth Cert: ${data.ritaNo}\n• Exam Index (CSEE): ${data.vocNecta}\n• Previous School: ${data.prevSchool} (${data.prevClass})\n• Student NIDA: ${data.vocNida}`;
       }
 
       if (channel === 'whatsapp') {
@@ -4042,7 +4114,7 @@
         
         let text = '';
         if (formLanguage === 'sw') {
-          text = `*FOMU YA USAJILI - ${encodeURIComponent(data.schoolName.toUpperCase())}*\n` +
+          text = `*FOMU YA USAJILI - ${data.schoolName.toUpperCase()}*\n` +
             `----------------------------------------\n` +
             `*1. TAARIFA ZA MWANAFUNZI*\n` +
             `• Jina: ${data.studentName}\n` +
@@ -4054,11 +4126,12 @@
             `${specDetailsText}\n\n` +
             `*2. MZAZI / MLEZI / MFADHILI*\n` +
             `• Jina: ${data.parentName} (${data.parentRel})\n` +
+            `• Kazi: ${data.parentOccupation}\n` +
             `• Simu ya Mzazi: ${data.parentPhone}\n` +
             `----------------------------------------\n` +
             `_Imetumwa kidijitali kupitia Elimu Express Tanzania_`;
         } else {
-          text = `*ADMISSION FORM - ${encodeURIComponent(data.schoolName.toUpperCase())}*\n` +
+          text = `*ADMISSION FORM - ${data.schoolName.toUpperCase()}*\n` +
             `----------------------------------------\n` +
             `*1. STUDENT PARTICULARS*\n` +
             `• Name: ${data.studentName}\n` +
@@ -4070,6 +4143,7 @@
             `${specDetailsText}\n\n` +
             `*2. PARENT / GUARDIAN PARTICULARS*\n` +
             `• Name: ${data.parentName} (${data.parentRel})\n` +
+            `• Occupation: ${data.parentOccupation}\n` +
             `• Phone Number: ${data.parentPhone}\n` +
             `----------------------------------------\n` +
             `_Dispatched via Elimu Express Tanzania_`;
@@ -5468,31 +5542,37 @@
 
       // Hash routing parser (e.g. #/forms or #/forms/tuangoma-primary)
       const hash = window.location.hash || '#/';
-      const hashPath = hash.replace(/^#/, ''); // Remove leading hash
-      const pathParts = hashPath.split('/').filter(p => p);
+      const hashClean = hash.replace(/^#\/?/, '').split('?')[0]; // Remove leading hash and query
+      const pathParts = hashClean.split('/').filter(p => p);
 
       if (!schoolId) {
         if (pathParts.length > 0) {
           const potentialId = pathParts[pathParts.length - 1].toLowerCase();
+          const firstPart = pathParts[0].toLowerCase();
           
           // Check if it's a known page
           const knownPages = ['forms', 'cms', 'pricing', 'contact', 'about', 'home'];
-          if (knownPages.includes(potentialId)) {
-            navigateTo(potentialId, false);
-            // Hide the embedded form if we route directly to forms page root
-            if (potentialId === 'forms') {
-              document.getElementById('active-form-wrapper').classList.add('hidden');
+          if (knownPages.includes(firstPart) && pathParts.length === 1) {
+            navigateTo(firstPart, false);
+            if (firstPart === 'forms') {
+              const activeWrap = document.getElementById('active-form-wrapper');
+              if (activeWrap) activeWrap.classList.add('hidden');
             }
             return;
           }
 
           // Check if matches school ID or slug
-          const school = institutions.find(i => 
-            i.id.toLowerCase() === potentialId || 
-            (i.slug && i.slug.toLowerCase() === potentialId)
-          );
+          const searchKey = pathParts.length > 1 ? potentialId : firstPart;
+          const school = (institutions && institutions.length > 0) ? institutions.find(i => 
+            i.id.toLowerCase() === searchKey || 
+            (i.slug && i.slug.toLowerCase() === searchKey)
+          ) : null;
+
           if (school) {
             schoolId = school.id;
+          } else if (knownPages.includes(firstPart)) {
+            navigateTo(firstPart, false);
+            return;
           }
         } else {
           // If empty path, route to home
@@ -5516,10 +5596,8 @@
           }
         }
         
-        setTimeout(() => {
-          navigateTo('forms', false);
-          openFormForSchool(schoolId, false);
-        }, 150);
+        navigateTo('forms', false);
+        openFormForSchool(schoolId, false);
       }
     }
 
@@ -5533,12 +5611,21 @@
 
     // Boot
     async function bootApp() {
+      // 1. Synchronously resolve current URL route immediately before awaiting async operations
+      checkUrlRouting();
+
       applySystemBranding();
       loadGlobalLanguage();
       loadAvailableFeatures();
       populatePredefinedFeatures();
       await loadSiteData();
-      checkUrlRouting();
+
+      // Ensure form is opened if school ID was in URL after data loaded
+      const hash = window.location.hash || '';
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('school') || hash.includes('/')) {
+        checkUrlRouting();
+      }
 
       // Set up auto-saving for form drafts
       const form = document.getElementById('institution-admission-form');
